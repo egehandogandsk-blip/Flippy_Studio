@@ -119,16 +119,17 @@ export const updateUserPresence = async (
 ): Promise<void> => {
     const presenceRef = doc(db, CANVASES_COLLECTION, sessionId, 'presence', userId);
 
-    const presence: Omit<ActiveUser, 'joinedAt' | 'lastSeen'> & {
-        joinedAt: any;
-        lastSeen: any;
-    } = {
+    const presence: any = {
         userId,
         displayName,
-        photoURL,
         joinedAt: serverTimestamp(),
         lastSeen: serverTimestamp(),
     };
+
+    // Only add photoURL if it exists (Firestore doesn't accept undefined)
+    if (photoURL) {
+        presence.photoURL = photoURL;
+    }
 
     await setDoc(presenceRef, presence, { merge: true });
 };
