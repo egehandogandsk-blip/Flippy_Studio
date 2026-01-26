@@ -35,6 +35,12 @@ export const TopToolbar: React.FC = () => {
         }
     };
 
+    const handleProfileClick = () => {
+        console.log('Profile icon clicked! Current state:', isProfileMenuOpen);
+        setIsProfileMenuOpen(!isProfileMenuOpen);
+        console.log('New state will be:', !isProfileMenuOpen);
+    };
+
     const menuItems = [
         { label: 'Profile', icon: '👤', onClick: () => console.log('Profile clicked') },
         { label: 'Token', icon: '🔑', onClick: () => console.log('Token clicked') },
@@ -42,8 +48,10 @@ export const TopToolbar: React.FC = () => {
         { label: 'Log out', icon: '🚪', onClick: handleLogout, danger: true },
     ];
 
+    console.log('TopToolbar render - isProfileMenuOpen:', isProfileMenuOpen);
+
     return (
-        <header className="h-12 bg-white border-b border-neutral-200 flex items-center px-4 justify-between z-10 shrink-0">
+        <header className="h-12 bg-white border-b border-neutral-200 flex items-center px-4 justify-between z-50 shrink-0 relative">
             <div className="font-bold text-lg tracking-wider text-indigo-600">forge</div>
             <div className="flex gap-2">
                 {/* Placeholder tools */}
@@ -55,7 +63,7 @@ export const TopToolbar: React.FC = () => {
             {/* User Profile with Dropdown */}
             <div className="relative" ref={menuRef}>
                 <button
-                    onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                    onClick={handleProfileClick}
                     className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs text-white hover:scale-110 transition-transform duration-200 cursor-pointer"
                     title={user?.displayName || user?.email || 'User'}
                 >
@@ -72,7 +80,10 @@ export const TopToolbar: React.FC = () => {
 
                 {/* Dropdown Menu */}
                 {isProfileMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-2xl border border-neutral-200 py-2 z-50">
+                    <div
+                        className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-2xl border border-neutral-200 py-2 z-[9999]"
+                        style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px' }}
+                    >
                         {/* User Info Header */}
                         <div className="px-4 py-2 border-b border-neutral-200">
                             <p className="text-sm font-semibold text-neutral-800 truncate">
@@ -89,8 +100,8 @@ export const TopToolbar: React.FC = () => {
                                 key={index}
                                 onClick={item.onClick}
                                 className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 transition-colors ${item.danger
-                                        ? 'text-red-600 hover:bg-red-50'
-                                        : 'text-neutral-700 hover:bg-neutral-100'
+                                    ? 'text-red-600 hover:bg-red-50'
+                                    : 'text-neutral-700 hover:bg-neutral-100'
                                     }`}
                             >
                                 <span className="text-base">{item.icon}</span>
