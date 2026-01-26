@@ -13,7 +13,7 @@ export const FabricCanvas: React.FC = () => {
     const [currentShape, setCurrentShape] = useState<fabric.Object | null>(null);
     const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null);
 
-    const { activeTool } = useToolStore();
+    const { activeTool, setActiveTool } = useToolStore();
 
     useEffect(() => {
         if (!canvasRef.current || !containerRef.current) return;
@@ -108,6 +108,127 @@ export const FabricCanvas: React.FC = () => {
         };
     }, [setSelectedObject]);
 
+    // Keyboard shortcuts
+    useEffect(() => {
+        const canvas = fabricRef.current;
+        if (!canvas) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Don't trigger if user is typing in an input
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+                return;
+            }
+
+            const activeObject = canvas.getActiveObject();
+
+            // Delete
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                if (activeObject) {
+                    canvas.remove(activeObject);
+                    canvas.discardActiveObject();
+                    canvas.renderAll();
+                    setSelectedObject(null);
+                }
+            }
+
+            // Ctrl/Cmd shortcuts
+            const isMod = e.ctrlKey || e.metaKey;
+
+            if (isMod) {
+                switch (e.key.toLowerCase()) {
+                    case 'a':
+                        e.preventDefault();
+                        // Select all
+                        const allObjects = canvas.getObjects();
+                        if (allObjects.length > 0) {
+                            const selection = new fabric.ActiveSelection(allObjects, { canvas });
+                            canvas.setActiveObject(selection);
+                            canvas.renderAll();
+                        }
+                        break;
+
+                    case 'c':
+                        e.preventDefault();
+                        // Copy
+                        if (activeObject) {
+                            (window as any).__clipboard = activeObject;
+                        }
+                        break;
+
+                    case 'v': {
+                        e.preventDefault();
+                        // Paste - Simple implementation for now
+                        const clipboard = (window as any).__clipboard;
+                        if (clipboard) {
+                            // Deep clone the object
+                            const json = JSON.stringify(clipboard.toObject());
+                            const clonedProps = JSON.parse(json);
+
+                            // Create new object based on type
+                            let cloned: fabric.Object | null = null;
+                            if (clipboard.type === 'rect') {
+                                cloned = new fabric.Rect(clonedProps);
+                            } else if (clipboard.type === 'circle') {
+                                cloned = new fabric.Circle(clonedProps);
+                            } else if (clipboard.type === 'i-text') {
+                                cloned = new fabric.IText(clonedProps.text, clonedProps);
+                            }
+
+                            if (cloned) {
+                                cloned.set({
+                                    left: (cloned.left || 0) + 20,
+                                    top: (cloned.top || 0) + 20,
+                                });
+                                canvas.add(cloned);
+                                canvas.setActiveObject(cloned);
+                                canvas.renderAll();
+                            }
+                        }
+                        break;
+                    }
+
+                    case 'z':
+                        e.preventDefault();
+                        // Undo - placeholder for now
+                        console.log('Undo - To be implemented with history stack');
+                        break;
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [setSelectedObject]);
+
+    // Canvas zoom with Ctrl + Mouse Wheel
+    useEffect(() => {
+        const canvas = fabricRef.current;
+        if (!canvas) return;
+
+        const handleWheel = (e: WheelEvent) => {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+
+                const delta = e.deltaY;
+                let zoom = canvas.getZoom();
+                zoom *= 0.999 ** delta;
+
+                // Limit zoom
+                if (zoom > 20) zoom = 20;
+                if (zoom < 0.01) zoom = 0.01;
+
+                canvas.zoomToPoint(new fabric.Point(e.offsetX, e.offsetY), zoom);
+            }
+        };
+
+        const canvasElement = canvas.getElement().parentElement;
+        canvasElement?.addEventListener('wheel', handleWheel, { passive: false });
+
+        return () => {
+            canvasElement?.removeEventListener('wheel', handleWheel);
+        };
+    }, []);
+
     // Mouse event handlers for drawing
     useEffect(() => {
         const canvas = fabricRef.current;
@@ -116,14 +237,14 @@ export const FabricCanvas: React.FC = () => {
         const handleMouseDown = (event: any) => {
             if (activeTool === 'cursor') return;
 
-            const pointer = canvas.getScenePoint(event.e);
+            const pointer = canvas.getViewportPoint(event.e);
             setIsDrawing(true);
             setStartPoint({ x: pointer.x, y: pointer.y });
 
             let shape: fabric.Object | null = null;
 
             switch (activeTool) {
-                case 'rectangle':
+                case 'rectangle': {
                     shape = new fabric.Rect({
                         left: pointer.x,
                         top: pointer.y,
@@ -135,8 +256,9 @@ export const FabricCanvas: React.FC = () => {
                         selectable: false,
                     });
                     break;
+                }
 
-                case 'ellipse':
+                case 'ellipse': {
                     shape = new fabric.Ellipse({
                         left: pointer.x,
                         top: pointer.y,
@@ -150,8 +272,9 @@ export const FabricCanvas: React.FC = () => {
                         originY: 'center',
                     });
                     break;
+                }
 
-                case 'frame':
+                case 'frame': {
                     shape = new fabric.Rect({
                         left: pointer.x,
                         top: pointer.y,
@@ -164,16 +287,18 @@ export const FabricCanvas: React.FC = () => {
                         selectable: false,
                     });
                     break;
+                }
 
-                case 'line':
+                case 'line': {
                     shape = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
                         stroke: '#000000',
                         strokeWidth: 2,
                         selectable: false,
                     });
                     break;
+                }
 
-                case 'text':
+                case 'text': {
                     const text = new fabric.IText('Type something...', {
                         left: pointer.x,
                         top: pointer.y,
@@ -186,7 +311,10 @@ export const FabricCanvas: React.FC = () => {
                     text.enterEditing();
                     text.selectAll();
                     canvas.renderAll();
+                    // Switch back to cursor tool
+                    setActiveTool('cursor');
                     return;
+                }
             }
 
             if (shape) {
@@ -199,7 +327,7 @@ export const FabricCanvas: React.FC = () => {
         const handleMouseMove = (event: any) => {
             if (!isDrawing || !currentShape || !startPoint) return;
 
-            const pointer = canvas.getScenePoint(event.e);
+            const pointer = canvas.getViewportPoint(event.e);
             const isShiftPressed = event.e.shiftKey;
             const isAltPressed = event.e.altKey;
 
@@ -274,6 +402,9 @@ export const FabricCanvas: React.FC = () => {
             if (currentShape) {
                 currentShape.set({ selectable: true });
                 canvas.setActiveObject(currentShape);
+
+                // Switch back to cursor tool after drawing
+                setActiveTool('cursor');
             }
             setIsDrawing(false);
             setCurrentShape(null);
@@ -290,7 +421,7 @@ export const FabricCanvas: React.FC = () => {
             canvas.off('mouse:move', handleMouseMove);
             canvas.off('mouse:up', handleMouseUp);
         };
-    }, [activeTool, isDrawing, currentShape, startPoint]);
+    }, [activeTool, isDrawing, currentShape, startPoint, setActiveTool]);
 
     return (
         <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-neutral-200">
