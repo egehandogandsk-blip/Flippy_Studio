@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 import { useCanvasStore } from '../../store/useCanvasStore';
+import { useCanvasObjectsStore } from '../../store/useCanvasObjectsStore';
 import { useToolStore } from '../../store/useToolStore';
 
 export const FabricCanvas: React.FC = () => {
@@ -76,6 +77,36 @@ export const FabricCanvas: React.FC = () => {
             fabricRef.current.renderAll();
         }
     }, [backgroundColor]);
+
+    // Track selected object
+    const setSelectedObject = useCanvasObjectsStore((state) => state.setSelectedObject);
+
+    useEffect(() => {
+        const canvas = fabricRef.current;
+        if (!canvas) return;
+
+        const handleSelectionCreated = (e: any) => {
+            setSelectedObject(e.selected?.[0] || null);
+        };
+
+        const handleSelectionUpdated = (e: any) => {
+            setSelectedObject(e.selected?.[0] || null);
+        };
+
+        const handleSelectionCleared = () => {
+            setSelectedObject(null);
+        };
+
+        canvas.on('selection:created', handleSelectionCreated);
+        canvas.on('selection:updated', handleSelectionUpdated);
+        canvas.on('selection:cleared', handleSelectionCleared);
+
+        return () => {
+            canvas.off('selection:created', handleSelectionCreated);
+            canvas.off('selection:updated', handleSelectionUpdated);
+            canvas.off('selection:cleared', handleSelectionCleared);
+        };
+    }, [setSelectedObject]);
 
     // Mouse event handlers for drawing
     useEffect(() => {
