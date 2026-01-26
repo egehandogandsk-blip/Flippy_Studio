@@ -5,6 +5,7 @@ import { useCanvasObjectsStore } from '../../store/useCanvasObjectsStore';
 import { useToolStore } from '../../store/useToolStore';
 import { useLayersStore } from '../../store/useLayersStore';
 import type { Layer } from '../../store/useLayersStore';
+import { useCanvasSync } from '../../hooks/useCanvasSync';
 
 interface PenPoint {
     x: number;
@@ -30,6 +31,11 @@ export const FabricCanvas: React.FC = () => {
 
     const { activeTool, setActiveTool } = useToolStore();
     const { addLayer, removeLayer, setLayers } = useLayersStore();
+
+    // Initialize canvas sync
+    const { syncToFirestore } = useCanvasSync({
+        canvasRef: fabricRef,
+    });
 
     useEffect(() => {
         if (!canvasRef.current || !containerRef.current) return;
@@ -117,6 +123,22 @@ export const FabricCanvas: React.FC = () => {
         };
 
         syncLayers();
+
+        // Listen for object modifications to sync to Firestore
+        canvas.on('object:modified', () => {
+            const objects = canvas.getObjects();
+            syncToFirestore(objects);
+        });
+
+        canvas.on('object:added', () => {
+            const objects = canvas.getObjects();
+            syncToFirestore(objects);
+        });
+
+        canvas.on('object:removed', () => {
+            const objects = canvas.getObjects();
+            syncToFirestore(objects);
+        });
 
         const resizeObserver = new ResizeObserver(() => {
             if (containerRef.current && fabricRef.current) {

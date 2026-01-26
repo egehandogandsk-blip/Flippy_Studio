@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Canvas sessions - read by anyone with link, write by authenticated users
+    match /canvases/{canvasId} {
+      // Anyone can read canvas data (for collaboration)
+      allow read: if true;
+      
+      // Only authenticated users can create, update, or delete
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null && 
+        (resource.data.ownerId == request.auth.uid || 
+         request.auth.uid in resource.data.collaborators);
+      
+      // Presence subcollection - read by anyone, write by authenticated users
+      match /presence/{userId} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Cursors subcollection - read by anyone, write by authenticated users
+      match /cursors/{userId} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}

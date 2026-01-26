@@ -5,6 +5,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { Undo, Redo, Download, FileImage, FileCode, ChevronRight } from 'lucide-react';
 import { useHistoryStore } from '../../store/useHistoryStore';
 import { ShareButton } from '../collaboration/ShareButton';
+import { ActiveUsersIndicator } from '../collaboration/ActiveUsersIndicator';
 
 interface MenuItem {
     label: string;
@@ -234,6 +235,9 @@ export const TopToolbar: React.FC = () => {
                 >
                     <Redo className="w-4 h-4" />
                 </button>
+
+                {/* Active Users */}
+                <ActiveUsersIndicator />
 
                 {/* Share Button */}
                 <ShareButton />
