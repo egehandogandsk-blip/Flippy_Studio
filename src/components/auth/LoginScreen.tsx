@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../../services/firebase';
 import { useAuthStore } from '../../store/useAuthStore';
 
 export const LoginScreen: React.FC = () => {
-    const [loading, setLoading] = React.useState(false);
-    const [error, setError] = React.useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const setUser = useAuthStore((state) => state.setUser);
 
     const handleGoogleLogin = async () => {
@@ -17,11 +17,44 @@ export const LoginScreen: React.FC = () => {
             setUser(result.user);
         } catch (err) {
             const error = err as Error;
-            setError(error.message || 'Failed to sign in');
+            const errorMessage = error.message || 'Failed to sign in';
+            setError(errorMessage);
             console.error('Login error:', err);
+
+            // Show Firebase Console instructions if unauthorized domain error
+            if (errorMessage.includes('unauthorized-domain')) {
+                setError('⚠️ Firebase domain hatası! Lütfen Firebase Console\'da "localhost" domain\'ini ekleyin. Detaylar için browser console\'u (F12) kontrol edin.');
+                console.error(`
+🔴 FIREBASE DOMAIN HATASI 🔴
+
+Çözüm Adımları:
+1. Firebase Console'u açın: https://console.firebase.google.com/project/forge-2cfcc/authentication/settings
+2. "Authorized domains" bölümüne gidin (sayfanın altında)
+3. "Add domain" butonuna tıklayın
+4. "localhost" yazın (PORT NUMARASI OLMADAN!)
+5. Save/Kaydet
+6. 1-2 dakika bekleyin
+7. Bu sayfayı yenileyin (Ctrl+Shift+R)
+
+Not: "localhost:5173" değil, sadece "localhost" yazın!
+        `);
+            }
         } finally {
             setLoading(false);
         }
+    };
+
+    // Development mode bypass
+    const handleDevMode = () => {
+        // Create a mock user for development
+        const mockUser = {
+            uid: 'dev-user-' + Date.now(),
+            email: 'dev@localhost',
+            displayName: 'Development User',
+            photoURL: null,
+        } as any;
+
+        setUser(mockUser);
     };
 
     return (
@@ -41,7 +74,7 @@ export const LoginScreen: React.FC = () => {
                 <button
                     onClick={handleGoogleLogin}
                     disabled={loading}
-                    className="w-full flex items-center justify-center gap-3 bg-white border-2 border-neutral-200 hover:border-indigo-500 hover:bg-indigo-50 text-neutral-700 font-semibold py-3 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full flex items-center justify-center gap-3 bg-white border-2 border-neutral-200 hover:border-indigo-500 hover:bg-indigo-50 text-neutral-700 font-semibold py-3 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-3"
                 >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -52,9 +85,32 @@ export const LoginScreen: React.FC = () => {
                     {loading ? 'Signing in...' : 'Continue with Google'}
                 </button>
 
+                {/* Development Mode Button */}
+                <button
+                    onClick={handleDevMode}
+                    className="w-full flex items-center justify-center gap-2 bg-yellow-50 border-2 border-yellow-300 hover:bg-yellow-100 text-yellow-800 font-semibold py-2 px-4 rounded-lg transition-all text-sm"
+                >
+                    <span>🔧 Development Mode (Skip Auth)</span>
+                </button>
+
                 <p className="text-xs text-neutral-500 text-center mt-6">
                     By signing in, you agree to our Terms of Service and Privacy Policy.
                 </p>
+
+                <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs text-blue-800 font-semibold mb-1">⚠️ Firebase Ayarı Gerekli</p>
+                    <p className="text-xs text-blue-700">
+                        Google login çalışmıyorsa, Firebase Console'da <code className="bg-blue-100 px-1 rounded">localhost</code> domain'ini ekleyin.
+                        <a
+                            href="https://console.firebase.google.com/project/forge-2cfcc/authentication/settings"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline ml-1"
+                        >
+                            Ayarlar →
+                        </a>
+                    </p>
+                </div>
             </div>
         </div>
     );
