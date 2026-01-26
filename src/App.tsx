@@ -1,13 +1,19 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './services/firebase';
 import { useAuthStore } from './store/useAuthStore';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { MainLayout } from './components/layout/MainLayout';
 import { FabricCanvas } from './components/canvas/FabricCanvas';
+import { preloadPopularFonts } from './utils/googleFonts';
 
-function App() {
+const App: React.FC = () => {
   const { user, loading, setUser, setLoading } = useAuthStore();
+
+  // Preload Google Fonts
+  useEffect(() => {
+    preloadPopularFonts();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {

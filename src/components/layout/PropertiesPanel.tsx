@@ -2,6 +2,7 @@ import React from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useCanvasObjectsStore } from '../../store/useCanvasObjectsStore';
 import { RectangleProperties } from '../properties/RectangleProperties';
+import { TextProperties } from '../properties/TextProperties';
 
 export const PropertiesPanel: React.FC = () => {
     const { backgroundColor, setBackgroundColor } = useCanvasStore();
@@ -15,6 +16,9 @@ export const PropertiesPanel: React.FC = () => {
             <div className="flex-1 py-4">
                 {/* Show Rectangle Properties if rectangle is selected */}
                 {selectedObject?.type === 'rect' && <RectangleProperties />}
+
+                {/* Show Text Properties if text is selected */}
+                {selectedObject?.type === 'i-text' && <TextProperties />}
 
                 {/* Show Canvas Properties if nothing is selected */}
                 {!selectedObject && (

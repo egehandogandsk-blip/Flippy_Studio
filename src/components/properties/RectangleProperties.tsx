@@ -214,31 +214,81 @@ export const RectangleProperties: React.FC = () => {
 
             {/* Stroke */}
             <div className="px-4">
-                <h4 className="text-xs font-semibold text-neutral-600 mb-2">Stroke</h4>
-                <div className="flex items-center gap-2 mb-2">
-                    <input
-                        type="color"
-                        value={props.stroke}
-                        onChange={(e) => updateProperty('stroke', e.target.value)}
-                        className="w-10 h-10 rounded border border-neutral-300 cursor-pointer"
-                    />
-                    <input
-                        type="text"
-                        value={props.stroke}
-                        onChange={(e) => updateProperty('stroke', e.target.value)}
-                        className="flex-1 px-2 py-1 text-sm border border-neutral-300 rounded focus:outline-none focus:border-indigo-500"
-                    />
+                <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-xs font-semibold text-neutral-600">Stroke</h4>
+                    <label className="flex items-center gap-1 text-xs">
+                        <input
+                            type="checkbox"
+                            checked={props.strokeWidth > 0}
+                            onChange={(e) => updateProperty('strokeWidth', e.target.checked ? 2 : 0)}
+                            className="rounded"
+                        />
+                        Enable
+                    </label>
                 </div>
-                <div>
-                    <label className="text-xs text-neutral-500 mb-1 block">Width</label>
-                    <input
-                        type="number"
-                        min="0"
-                        value={props.strokeWidth}
-                        onChange={(e) => updateProperty('strokeWidth', Number(e.target.value))}
-                        className="w-full px-2 py-1 text-sm border border-neutral-300 rounded focus:outline-none focus:border-indigo-500"
-                    />
-                </div>
+
+                {props.strokeWidth > 0 && (
+                    <>
+                        <div className="flex items-center gap-2 mb-2">
+                            <input
+                                type="color"
+                                value={props.stroke}
+                                onChange={(e) => updateProperty('stroke', e.target.value)}
+                                className="w-10 h-10 rounded border border-neutral-300 cursor-pointer"
+                            />
+                            <input
+                                type="text"
+                                value={props.stroke}
+                                onChange={(e) => updateProperty('stroke', e.target.value)}
+                                className="flex-1 px-2 py-1 text-sm border border-neutral-300 rounded focus:outline-none focus:border-indigo-500"
+                            />
+                        </div>
+                        <div className="mb-2">
+                            <label className="text-xs text-neutral-500 mb-1 block">Width</label>
+                            <input
+                                type="number"
+                                min="0"
+                                value={props.strokeWidth}
+                                onChange={(e) => updateProperty('strokeWidth', Number(e.target.value))}
+                                className="w-full px-2 py-1 text-sm border border-neutral-300 rounded focus:outline-none focus:border-indigo-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-xs text-neutral-500 mb-1 block">Alignment</label>
+                            <div className="flex gap-1">
+                                <button
+                                    onClick={() => {
+                                        // Inside stroke - not natively supported by Fabric, use strokeWidth/2 offset
+                                        selectedObject?.set({ strokeUniform: true });
+                                        selectedObject?.canvas?.renderAll();
+                                    }}
+                                    className="flex-1 px-2 py-1 text-xs border border-neutral-300 rounded hover:bg-neutral-50"
+                                >
+                                    Inside
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        selectedObject?.set({ strokeUniform: true });
+                                        selectedObject?.canvas?.renderAll();
+                                    }}
+                                    className="flex-1 px-2 py-1 text-xs border border-indigo-500 bg-indigo-50 text-indigo-600 rounded"
+                                >
+                                    Center
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        selectedObject?.set({ strokeUniform: false });
+                                        selectedObject?.canvas?.renderAll();
+                                    }}
+                                    className="flex-1 px-2 py-1 text-xs border border-neutral-300 rounded hover:bg-neutral-50"
+                                >
+                                    Outside
+                                </button>
+                            </div>
+                            <p className="text-xs text-neutral-400 mt-1">Note: Center is default for Fabric.js</p>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
