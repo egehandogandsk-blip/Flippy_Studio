@@ -4,6 +4,13 @@ import { useCanvasStore } from '../../store/useCanvasStore';
 import { useCanvasObjectsStore } from '../../store/useCanvasObjectsStore';
 import { useToolStore } from '../../store/useToolStore';
 
+interface PenPoint {
+    x: number;
+    y: number;
+    handleIn?: { x: number; y: number };
+    handleOut?: { x: number; y: number };
+}
+
 export const FabricCanvas: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -13,12 +20,17 @@ export const FabricCanvas: React.FC = () => {
     const [currentShape, setCurrentShape] = useState<fabric.Object | null>(null);
     const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null);
 
+    // Pen tool state
+    const [penPath, setPenPath] = useState<fabric.Path | null>(null);
+    const [penPoints, setPenPoints] = useState<PenPoint[]>([]);
+    const [isDraggingHandle, setIsDraggingHandle] = useState(false);
+    const [tempHandleCircle, setTempHandleCircle] = useState<fabric.Circle | null>(null);
+
     const { activeTool, setActiveTool } = useToolStore();
 
     useEffect(() => {
         if (!canvasRef.current || !containerRef.current) return;
 
-        // Initialize Fabric Canvas
         if (fabricRef.current) {
             return;
         }
@@ -32,7 +44,6 @@ export const FabricCanvas: React.FC = () => {
 
         fabricRef.current = canvas;
 
-        // Handle Resize
         const resizeObserver = new ResizeObserver(() => {
             if (containerRef.current && fabricRef.current) {
                 fabricRef.current.setDimensions({
@@ -61,7 +72,6 @@ export const FabricCanvas: React.FC = () => {
             fabricRef.current.defaultCursor = activeTool === 'cursor' ? 'default' : 'crosshair';
             fabricRef.current.hoverCursor = activeTool === 'cursor' ? 'move' : 'crosshair';
 
-            // Disable object selection when not using cursor tool
             if (activeTool !== 'cursor') {
                 fabricRef.current.discardActiveObject();
                 fabricRef.current.renderAll();
@@ -108,20 +118,80 @@ export const FabricCanvas: React.FC = () => {
         };
     }, [setSelectedObject]);
 
+    // Convert pen points to SVG path string
+    const pointsToPathString = (points: PenPoint[]): string => {
+        if (points.length === 0) return '';
+
+        let pathString = `M ${points[0].x} ${points[0].y}`;
+
+        for (let i = 1; i < points.length; i++) {
+            const prev = points[i - 1];
+            const curr = points[i];
+
+            if (prev.handleOut && curr.handleIn) {
+                // Cubic bezier curve
+                pathString += ` C ${prev.handleOut.x} ${prev.handleOut.y}, ${curr.handleIn.x} ${curr.handleIn.y}, ${curr.x} ${curr.y}`;
+            } else if (prev.handleOut) {
+                // Quadratic-like with one handle
+                pathString += ` Q ${prev.handleOut.x} ${prev.handleOut.y}, ${curr.x} ${curr.y}`;
+            } else {
+                // Straight line
+                pathString += ` L ${curr.x} ${curr.y}`;
+            }
+        }
+
+        return pathString;
+    };
+
+    // Finish pen path
+    const finishPenPath = () => {
+        const canvas = fabricRef.current;
+        if (!canvas || !penPath) return;
+
+        // Remove temp handle circle
+        if (tempHandleCircle) {
+            canvas.remove(tempHandleCircle);
+            setTempHandleCircle(null);
+        }
+
+        penPath.set({ selectable: true });
+        canvas.setActiveObject(penPath);
+        setPenPath(null);
+        setPenPoints([]);
+        setActiveTool('cursor');
+        canvas.renderAll();
+    };
+
     // Keyboard shortcuts
     useEffect(() => {
         const canvas = fabricRef.current;
         if (!canvas) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Don't trigger if user is typing in an input
             if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+                return;
+            }
+
+            // Escape: Finish pen tool
+            if (e.key === 'Escape') {
+                if (penPath) {
+                    finishPenPath();
+                }
+                return;
+            }
+
+            // Enter: Close path and finish
+            if (e.key === 'Enter') {
+                if (penPath && penPoints.length > 2) {
+                    // Close the path
+                    penPath.set({ path: pointsToPathString(penPoints) + ' Z' as any });
+                    finishPenPath();
+                }
                 return;
             }
 
             const activeObject = canvas.getActiveObject();
 
-            // Delete
             if (e.key === 'Delete' || e.key === 'Backspace') {
                 if (activeObject) {
                     canvas.remove(activeObject);
@@ -131,14 +201,12 @@ export const FabricCanvas: React.FC = () => {
                 }
             }
 
-            // Ctrl/Cmd shortcuts
             const isMod = e.ctrlKey || e.metaKey;
 
             if (isMod) {
                 switch (e.key.toLowerCase()) {
-                    case 'a':
+                    case 'a': {
                         e.preventDefault();
-                        // Select all
                         const allObjects = canvas.getObjects();
                         if (allObjects.length > 0) {
                             const selection = new fabric.ActiveSelection(allObjects, { canvas });
@@ -146,25 +214,23 @@ export const FabricCanvas: React.FC = () => {
                             canvas.renderAll();
                         }
                         break;
+                    }
 
-                    case 'c':
+                    case 'c': {
                         e.preventDefault();
-                        // Copy
                         if (activeObject) {
                             (window as any).__clipboard = activeObject;
                         }
                         break;
+                    }
 
                     case 'v': {
                         e.preventDefault();
-                        // Paste - Simple implementation for now
                         const clipboard = (window as any).__clipboard;
                         if (clipboard) {
-                            // Deep clone the object
                             const json = JSON.stringify(clipboard.toObject());
                             const clonedProps = JSON.parse(json);
 
-                            // Create new object based on type
                             let cloned: fabric.Object | null = null;
                             if (clipboard.type === 'rect') {
                                 cloned = new fabric.Rect(clonedProps);
@@ -172,6 +238,8 @@ export const FabricCanvas: React.FC = () => {
                                 cloned = new fabric.Circle(clonedProps);
                             } else if (clipboard.type === 'i-text') {
                                 cloned = new fabric.IText(clonedProps.text, clonedProps);
+                            } else if (clipboard.type === 'path') {
+                                cloned = new fabric.Path(clonedProps.path, clonedProps);
                             }
 
                             if (cloned) {
@@ -189,7 +257,6 @@ export const FabricCanvas: React.FC = () => {
 
                     case 'z':
                         e.preventDefault();
-                        // Undo - placeholder for now
                         console.log('Undo - To be implemented with history stack');
                         break;
                 }
@@ -198,7 +265,7 @@ export const FabricCanvas: React.FC = () => {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [setSelectedObject]);
+    }, [setSelectedObject, penPath, penPoints]);
 
     // Canvas zoom with Ctrl + Mouse Wheel
     useEffect(() => {
@@ -213,7 +280,6 @@ export const FabricCanvas: React.FC = () => {
                 let zoom = canvas.getZoom();
                 zoom *= 0.999 ** delta;
 
-                // Limit zoom
                 if (zoom > 20) zoom = 20;
                 if (zoom < 0.01) zoom = 0.01;
 
@@ -235,9 +301,43 @@ export const FabricCanvas: React.FC = () => {
         if (!canvas) return;
 
         const handleMouseDown = (event: any) => {
+            const pointer = canvas.getViewportPoint(event.e);
+
             if (activeTool === 'cursor') return;
 
-            const pointer = canvas.getViewportPoint(event.e);
+            // Pen Tool Logic
+            if (activeTool === 'pen') {
+                setIsDrawing(false);
+                setIsDraggingHandle(true);
+
+                if (penPath === null) {
+                    // Start new path
+                    const newPoint: PenPoint = { x: pointer.x, y: pointer.y };
+                    setPenPoints([newPoint]);
+
+                    const pathString = `M ${pointer.x} ${pointer.y}`;
+                    const path = new fabric.Path(pathString, {
+                        stroke: '#000000',
+                        strokeWidth: 2,
+                        fill: '',
+                        selectable: false,
+                    });
+
+                    canvas.add(path);
+                    setPenPath(path);
+                } else {
+                    // Add new point
+                    const newPoint: PenPoint = { x: pointer.x, y: pointer.y };
+                    const updatedPoints = [...penPoints, newPoint];
+                    setPenPoints(updatedPoints);
+
+                    penPath.set({ path: pointsToPathString(updatedPoints) as any });
+                    canvas.renderAll();
+                }
+                return;
+            }
+
+            // Other tools
             setIsDrawing(true);
             setStartPoint({ x: pointer.x, y: pointer.y });
 
@@ -311,7 +411,6 @@ export const FabricCanvas: React.FC = () => {
                     text.enterEditing();
                     text.selectAll();
                     canvas.renderAll();
-                    // Switch back to cursor tool
                     setActiveTool('cursor');
                     return;
                 }
@@ -325,9 +424,56 @@ export const FabricCanvas: React.FC = () => {
         };
 
         const handleMouseMove = (event: any) => {
+            const pointer = canvas.getViewportPoint(event.e);
+
+            // Pen tool: Handle dragging for bezier curves
+            if (activeTool === 'pen' && isDraggingHandle && penPoints.length > 0) {
+                const lastPoint = penPoints[penPoints.length - 1];
+                const dx = pointer.x - lastPoint.x;
+                const dy = pointer.y - lastPoint.y;
+
+                // Create handle out for current point
+                lastPoint.handleOut = { x: lastPoint.x + dx, y: lastPoint.y + dy };
+
+                // Mirror handle in for smooth curve
+                if (penPoints.length > 1) {
+                    lastPoint.handleIn = { x: lastPoint.x - dx, y: lastPoint.y - dy };
+                }
+
+                // Show handle visualization
+                if (!tempHandleCircle) {
+                    const circle = new fabric.Circle({
+                        left: pointer.x - 3,
+                        top: pointer.y - 3,
+                        radius: 3,
+                        fill: '#6366F1',
+                        selectable: false,
+                    });
+                    canvas.add(circle);
+                    setTempHandleCircle(circle);
+                } else {
+                    tempHandleCircle.set({ left: pointer.x - 3, top: pointer.y - 3 });
+                }
+
+                setPenPoints([...penPoints]);
+                if (penPath) {
+                    penPath.set({ path: pointsToPathString(penPoints) as any });
+                }
+                canvas.renderAll();
+                return;
+            }
+
+            // Pen tool: Preview line to cursor
+            if (activeTool === 'pen' && penPath && penPoints.length > 0 && !isDraggingHandle) {
+                let pathString = pointsToPathString(penPoints);
+                pathString += ` L ${pointer.x} ${pointer.y}`;
+                penPath.set({ path: pathString as any });
+                canvas.renderAll();
+                return;
+            }
+
             if (!isDrawing || !currentShape || !startPoint) return;
 
-            const pointer = canvas.getViewportPoint(event.e);
             const isShiftPressed = event.e.shiftKey;
             const isAltPressed = event.e.altKey;
 
@@ -338,14 +484,12 @@ export const FabricCanvas: React.FC = () => {
                     let width = pointer.x - startPoint.x;
                     let height = pointer.y - startPoint.y;
 
-                    // Shift: constrain to square
                     if (isShiftPressed) {
                         const size = Math.max(Math.abs(width), Math.abs(height));
                         width = width < 0 ? -size : size;
                         height = height < 0 ? -size : size;
                     }
 
-                    // Alt: draw from center
                     if (isAltPressed) {
                         rect.set({
                             left: startPoint.x - Math.abs(width) / 2,
@@ -369,7 +513,6 @@ export const FabricCanvas: React.FC = () => {
                     let rx = Math.abs(pointer.x - startPoint.x) / 2;
                     let ry = Math.abs(pointer.y - startPoint.y) / 2;
 
-                    // Shift: constrain to circle
                     if (isShiftPressed) {
                         const r = Math.max(rx, ry);
                         rx = r;
@@ -399,11 +542,20 @@ export const FabricCanvas: React.FC = () => {
         };
 
         const handleMouseUp = () => {
+            // Pen tool: Finish handle dragging
+            if (activeTool === 'pen' && isDraggingHandle) {
+                setIsDraggingHandle(false);
+                if (tempHandleCircle) {
+                    canvas.remove(tempHandleCircle);
+                    setTempHandleCircle(null);
+                }
+                canvas.renderAll();
+                return;
+            }
+
             if (currentShape) {
                 currentShape.set({ selectable: true });
                 canvas.setActiveObject(currentShape);
-
-                // Switch back to cursor tool after drawing
                 setActiveTool('cursor');
             }
             setIsDrawing(false);
@@ -421,7 +573,7 @@ export const FabricCanvas: React.FC = () => {
             canvas.off('mouse:move', handleMouseMove);
             canvas.off('mouse:up', handleMouseUp);
         };
-    }, [activeTool, isDrawing, currentShape, startPoint, setActiveTool]);
+    }, [activeTool, isDrawing, currentShape, startPoint, setActiveTool, penPath, penPoints, isDraggingHandle, tempHandleCircle]);
 
     return (
         <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-neutral-200">
