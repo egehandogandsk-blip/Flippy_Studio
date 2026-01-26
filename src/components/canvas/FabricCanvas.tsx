@@ -3,6 +3,8 @@ import * as fabric from 'fabric';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useCanvasObjectsStore } from '../../store/useCanvasObjectsStore';
 import { useToolStore } from '../../store/useToolStore';
+import { useLayersStore } from '../../store/useLayersStore';
+import type { Layer } from '../../store/useLayersStore';
 
 interface PenPoint {
     x: number;
@@ -27,6 +29,7 @@ export const FabricCanvas: React.FC = () => {
     const [tempHandleCircle, setTempHandleCircle] = useState<fabric.Circle | null>(null);
 
     const { activeTool, setActiveTool } = useToolStore();
+    const { addLayer, removeLayer, setLayers } = useLayersStore();
 
     useEffect(() => {
         if (!canvasRef.current || !containerRef.current) return;
@@ -43,6 +46,77 @@ export const FabricCanvas: React.FC = () => {
         });
 
         fabricRef.current = canvas;
+
+        // Helper function to get object type name
+        const getObjectTypeName = (obj: fabric.Object): string => {
+            if (obj.type === 'rect') return 'Rectangle';
+            if (obj.type === 'circle') return 'Ellipse';
+            if (obj.type === 'i-text' || obj.type === 'text') return 'Text';
+            if (obj.type === 'line') return 'Line';
+            if (obj.type === 'path') return 'Path';
+            return obj.type || 'Object';
+        };
+
+        // Helper function to generate unique ID
+        const generateLayerId = () => `layer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        // Track object additions
+        canvas.on('object:added', (e) => {
+            if (!e.target) return;
+
+            // Check if layer already exists
+            const existingLayer = useLayersStore.getState().layers.find(l => l.fabricObject === e.target);
+            if (existingLayer) return;
+
+            const obj = e.target;
+            const layerId = generateLayerId();
+
+            // Store layer ID in fabric object for reference
+            obj.set('layerId', layerId);
+
+            const layer: Layer = {
+                id: layerId,
+                name: getObjectTypeName(obj),
+                type: obj.type || 'object',
+                visible: obj.visible !== false,
+                locked: obj.selectable === false,
+                fabricObject: obj
+            };
+
+            addLayer(layer);
+        });
+
+        // Track object removals
+        canvas.on('object:removed', (e) => {
+            if (!e.target) return;
+            const layerId = (e.target as any).layerId;
+            if (layerId) {
+                removeLayer(layerId);
+            }
+        });
+
+        const syncLayers = () => {
+            const objects = canvas.getObjects();
+            const newLayers: Layer[] = objects.map((obj) => {
+                let layerId = (obj as any).layerId;
+                if (!layerId) {
+                    layerId = generateLayerId();
+                    obj.set('layerId', layerId);
+                }
+
+                return {
+                    id: layerId,
+                    name: getObjectTypeName(obj),
+                    type: obj.type || 'object',
+                    visible: obj.visible !== false,
+                    locked: obj.selectable === false,
+                    fabricObject: obj
+                };
+            });
+            setLayers(newLayers);
+        };
+
+        syncLayers();
 
         const resizeObserver = new ResizeObserver(() => {
             if (containerRef.current && fabricRef.current) {
