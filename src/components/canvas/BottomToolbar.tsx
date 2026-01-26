@@ -1,5 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import { useToolStore } from '../../store/useToolStore';
+import {
+    MousePointer2,
+    Square,
+    Circle,
+    Minus,
+    MoveRight,
+    Pentagon,
+    Star,
+    Type,
+    PenTool,
+    ChevronDown
+} from 'lucide-react';
 
 interface ToolButtonProps {
     tool: string;
@@ -23,16 +35,14 @@ const ToolButton: React.FC<ToolButtonProps> = ({
         <button
             onClick={onClick}
             className={`relative flex items-center justify-center h-9 px-2 rounded transition-colors ${active
-                ? 'bg-blue-600 text-white'
-                : 'text-neutral-300 hover:bg-neutral-800 hover:text-white'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-neutral-300 hover:bg-neutral-800 hover:text-white'
                 }`}
             title={`${label}${shortcut ? ` (${shortcut})` : ''}`}
         >
             {icon}
             {hasDropdown && (
-                <svg className="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
+                <ChevronDown className="w-3 h-3 ml-1" />
             )}
         </button>
     );
@@ -101,12 +111,12 @@ export const BottomToolbar: React.FC = () => {
     }, [setActiveTool]);
 
     const shapeTools = [
-        { tool: 'rectangle', label: 'Rectangle', shortcut: 'R', icon: '▭' },
-        { tool: 'line', label: 'Line', shortcut: 'L', icon: '/' },
-        { tool: 'arrow', label: 'Arrow', shortcut: 'Shift+L', icon: '→' },
-        { tool: 'ellipse', label: 'Ellipse', shortcut: 'O', icon: '○' },
-        { tool: 'polygon', label: 'Polygon', shortcut: '', icon: '⬡' },
-        { tool: 'star', label: 'Star', shortcut: '', icon: '★' },
+        { tool: 'rectangle', label: 'Rectangle', shortcut: 'R', icon: <Square className="w-4 h-4" /> },
+        { tool: 'line', label: 'Line', shortcut: 'L', icon: <Minus className="w-4 h-4" /> },
+        { tool: 'arrow', label: 'Arrow', shortcut: 'Shift+L', icon: <MoveRight className="w-4 h-4" /> },
+        { tool: 'ellipse', label: 'Ellipse', shortcut: 'O', icon: <Circle className="w-4 h-4" /> },
+        { tool: 'polygon', label: 'Polygon', shortcut: '', icon: <Pentagon className="w-4 h-4" /> },
+        { tool: 'star', label: 'Star', shortcut: '', icon: <Star className="w-4 h-4" /> },
     ];
 
     const isShapeTool = ['rectangle', 'line', 'arrow', 'ellipse', 'polygon', 'star'].includes(activeTool);
@@ -117,11 +127,7 @@ export const BottomToolbar: React.FC = () => {
                 {/* Cursor Tool */}
                 <ToolButton
                     tool="cursor"
-                    icon={
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                        </svg>
-                    }
+                    icon={<MousePointer2 className="w-4 h-4" />}
                     label="Move"
                     shortcut="V"
                     onClick={() => setActiveTool('cursor')}
@@ -131,11 +137,7 @@ export const BottomToolbar: React.FC = () => {
                 {/* Frame Tool */}
                 <ToolButton
                     tool="frame"
-                    icon={
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z" />
-                        </svg>
-                    }
+                    icon={<Square className="w-4 h-4" strokeDasharray="4" />}
                     label="Frame"
                     shortcut="F"
                     onClick={() => setActiveTool('frame')}
@@ -146,11 +148,7 @@ export const BottomToolbar: React.FC = () => {
                 <div className="relative" ref={shapeMenuRef}>
                     <ToolButton
                         tool="shape"
-                        icon={
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5z" />
-                            </svg>
-                        }
+                        icon={<Square className="w-4 h-4" />}
                         label="Shape"
                         onClick={() => setShapeMenuOpen(!shapeMenuOpen)}
                         active={isShapeTool}
@@ -168,12 +166,12 @@ export const BottomToolbar: React.FC = () => {
                                         setShapeMenuOpen(false);
                                     }}
                                     className={`w-full px-4 py-2 text-left text-sm flex items-center justify-between transition-colors ${activeTool === shape.tool
-                                        ? 'bg-blue-600 text-white'
-                                        : 'text-neutral-300 hover:bg-neutral-800 hover:text-white'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'text-neutral-300 hover:bg-neutral-800 hover:text-white'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <span className="text-lg">{shape.icon}</span>
+                                        {shape.icon}
                                         <span>{shape.label}</span>
                                     </div>
                                     {shape.shortcut && (
@@ -188,11 +186,7 @@ export const BottomToolbar: React.FC = () => {
                 {/* Pen Tool */}
                 <ToolButton
                     tool="pen"
-                    icon={
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                    }
+                    icon={<PenTool className="w-4 h-4" />}
                     label="Pen"
                     shortcut="P"
                     onClick={() => setActiveTool('pen')}
@@ -202,11 +196,7 @@ export const BottomToolbar: React.FC = () => {
                 {/* Text Tool */}
                 <ToolButton
                     tool="text"
-                    icon={
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                        </svg>
-                    }
+                    icon={<Type className="w-4 h-4" />}
                     label="Text"
                     shortcut="T"
                     onClick={() => setActiveTool('text')}
