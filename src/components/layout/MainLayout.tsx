@@ -2,6 +2,7 @@ import React from 'react';
 import { TopToolbar } from './TopToolbar';
 import { LayersPanel } from './LayersPanel';
 import { PropertiesPanel } from './PropertiesPanel';
+import { BottomToolbar } from '../canvas/BottomToolbar';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -14,13 +15,15 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <TopToolbar />
 
             {/* Main Content Area */}
-            <div className="flex flex-1 overflow-hidden">
+            <div className="flex flex-1 overflow-hidden relative">
                 {/* Left Panel: Layers */}
                 <LayersPanel />
 
                 {/* Center: Canvas */}
                 <main className="flex-1 relative bg-neutral-200 overflow-hidden flex items-center justify-center">
                     {children}
+                    {/* Bottom Toolbar */}
+                    <BottomToolbar />
                 </main>
 
                 {/* Right Panel: Properties */}
