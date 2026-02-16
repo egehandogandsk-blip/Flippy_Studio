@@ -28,8 +28,9 @@ interface IntegrationState {
     connectRepo: (engine: EngineType, url: string) => Promise<void>;
     toggleScreenSelection: (engine: EngineType, screenId: string) => void;
     syncChanges: (engine: EngineType) => Promise<void>;
-    importScreens: (engine: EngineType) => Promise<void>;
-    pushChanges: (engine: EngineType) => Promise<void>;
+    importScreens: (engine: EngineType) => Promise<GameScreen[]>;
+    pushChanges: (engine: EngineType, message?: string) => Promise<void>;
+    registerChange: (engine: EngineType) => void;
 }
 
 // ...
