@@ -52,31 +52,45 @@ export const LoginScreen = () => {
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-zinc-950 relative">
                 <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" />
 
-                <div className="w-full max-w-md relative z-10">
+                {/* Glow Effect */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+
+                <div className="w-full max-w-lg relative z-10 bg-zinc-900/50 backdrop-blur-xl border border-white/5 p-8 rounded-3xl shadow-2xl">
                     <SignIn
                         appearance={{
+                            layout: {
+                                socialButtonsPlacement: "top",
+                                socialButtonsVariant: "blockButton",
+                            },
+                            variables: {
+                                colorPrimary: "#4f46e5", // Indigo 600
+                                colorText: "white",
+                                colorTextSecondary: "#a1a1aa", // Zinc 400
+                                colorBackground: "transparent",
+                                colorInputBackground: "#18181b", // Zinc 900
+                                colorInputText: "white",
+                                borderRadius: "0.75rem",
+                            },
                             elements: {
                                 rootBox: "w-full",
                                 card: "bg-transparent shadow-none border-none p-0 w-full",
                                 headerTitle: "text-3xl font-bold text-white mb-2",
                                 headerSubtitle: "text-zinc-400 text-base mb-6",
-                                socialButtonsBlockButton: "bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white h-12 rounded-xl transition-all",
-                                socialButtonsBlockButtonText: "font-medium",
+                                socialButtonsBlockButton: "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 text-white h-12 rounded-xl transition-all",
+                                socialButtonsBlockButtonText: "font-medium text-white",
                                 dividerLine: "bg-zinc-800",
-                                dividerText: "text-zinc-500 bg-zinc-950 px-3",
+                                dividerText: "text-zinc-500 bg-transparent px-3",
                                 formFieldLabel: "text-zinc-400 font-medium",
-                                formFieldInput: "bg-zinc-900 border-zinc-800 text-white rounded-xl h-11 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all",
-                                formButtonPrimary: "bg-indigo-600 hover:bg-indigo-500 text-white h-11 rounded-xl shadow-lg shadow-indigo-500/20 transition-all font-medium",
+                                formFieldInput: "bg-zinc-900/50 border-zinc-700 text-white rounded-xl h-11 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all",
+                                formButtonPrimary: "bg-indigo-600 hover:bg-indigo-500 text-white h-11 rounded-xl shadow-lg shadow-indigo-500/20 transition-all font-medium text-base",
                                 footerActionLink: "text-indigo-400 hover:text-indigo-300 font-medium",
+                                footer: "bg-transparent",
                                 identityPreviewText: "text-zinc-300",
                                 identityPreviewEditButtonIcon: "text-indigo-400",
                                 formFieldAction: "text-indigo-400 hover:text-indigo-300",
-                                alert: "bg-red-900/20 border border-red-900/50 text-red-200",
+                                alert: "bg-red-500/10 border border-red-500/20 text-red-200",
+                                alertText: "text-red-200",
                                 phoneInputBox: "bg-zinc-900 border-zinc-800 text-white rounded-xl"
-                            },
-                            layout: {
-                                socialButtonsPlacement: "top",
-                                socialButtonsVariant: "blockButton",
                             }
                         }}
                     />
