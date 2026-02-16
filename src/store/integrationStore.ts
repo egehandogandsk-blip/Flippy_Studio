@@ -131,6 +131,22 @@ export const useIntegrationStore = create<IntegrationState>((set, get) => ({
         }
     })),
 
+    syncChanges: async (engine) => {
+        // Simulate sync operation
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        set(state => ({
+            engines: {
+                ...state.engines,
+                [engine]: {
+                    ...state.engines[engine],
+                    lastSynced: new Date().toISOString(),
+                    hasChanges: false
+                }
+            }
+        }));
+    },
+
     importScreens: async (engine) => {
         // Simulate processing
         await new Promise(resolve => setTimeout(resolve, 1000));
