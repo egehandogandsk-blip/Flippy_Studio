@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDocumentStore } from '../../store/documentStore';
+import { ImageContextBar } from './ImageContextBar';
 
 interface SelectionBoxProps {
     nodeId: string;
@@ -208,6 +209,20 @@ export const SelectionBox: React.FC<SelectionBoxProps> = ({ nodeId, zoom }) => {
                     onMouseDown={(e) => handleMouseDown(e, handle.position)}
                 />
             ))}
+            {/* Context Bar for Images */}
+            {node.type === 'IMAGE' && (
+                <foreignObject
+                    x={node.x}
+                    y={node.y + node.height}
+                    width={node.width}
+                    height={100} // Sufficient height for the bar
+                    style={{ overflow: 'visible', pointerEvents: 'none' }} // Allow clicks to pass through wrapper but catch on bar
+                >
+                    <ImageContextBar nodeId={nodeId} zoom={zoom} />
+                </foreignObject>
+            )}
         </g>
     );
 };
+
+// Import at the top (this will be handled by the import addition below)
