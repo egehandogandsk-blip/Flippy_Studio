@@ -1,73 +1,65 @@
-# React + TypeScript + Vite
+# Studio Forge - Complete SaaS Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A powerful visual design tool built with React, Vite, and modern SaaS infrastructure.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Visual Canvas Editor** - Infinite canvas with layers, frames, and components
+- **AI Integration** - AI-powered design suggestions and generation
+- **Authentication** - Secure auth with Clerk (Google & GitHub login)
+- **Subscription Plans** - Stripe-powered subscription system
+- **Project Publishing** - Share projects with unique public URLs
+- **Real-time Collaboration** - Team workspace features
+- **Theme System** - Dark, Light, and High Contrast modes
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: TailwindCSS
+- **State Management**: Zustand
+- **Authentication**: Clerk
+- **Database**: Supabase (PostgreSQL) + Prisma ORM
+- **Payments**: Stripe
+- **Deployment**: Vercel
 
-## Expanding the ESLint configuration
+## 📦 Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# Install dependencies
+npm install
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Setup environment variables
+cp .env.example .env.local
+# Fill in your API keys in .env.local
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# Run database migrations
+npx prisma migrate dev
+npx prisma generate
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Start development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🔑 Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+See `.env.example` for required variables:
+- Clerk (Authentication)
+- Supabase (Database)
+- Stripe (Payments)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📖 Documentation
+
+- See `DEPLOYMENT.md` for deployment instructions
+- See `implementation_plan.md` for architecture details
+
+## 🌐 Deployment
+
+This project is configured for Vercel deployment. See `DEPLOYMENT.md` for full instructions.
+
+## 📝 License
+
+MIT
+
+## 👨‍💻 Author
+
+Egehan Doğan
