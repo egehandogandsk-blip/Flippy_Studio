@@ -154,10 +154,10 @@ export const applyTheme = (themeName: 'dark' | 'light' | 'high-contrast') => {
     });
 
     // Store theme choice
-    localStorage.setItem('studio-forge-theme', themeName);
+    localStorage.setItem('flippy-theme', themeName);
 };
 
 export const getStoredTheme = (): 'dark' | 'light' | 'high-contrast' => {
-    const stored = localStorage.getItem('studio-forge-theme');
+    const stored = localStorage.getItem('flippy-theme');
     return (stored as any) || 'dark';
 };

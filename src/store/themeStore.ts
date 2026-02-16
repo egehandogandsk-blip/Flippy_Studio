@@ -17,7 +17,7 @@ export const useThemeStore = create<ThemeState>()(
             }
         }),
         {
-            name: 'studio-forge-theme'
+            name: 'flippy-theme'
         }
     )
 );

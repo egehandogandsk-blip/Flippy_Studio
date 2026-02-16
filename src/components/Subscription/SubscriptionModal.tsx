@@ -27,7 +27,7 @@ interface PricingPlan {
 const plans: PricingPlan[] = [
     {
         id: 'lite',
-        name: 'Forge Lite',
+        name: 'Flippy Lite',
         price: 0,
         period: 'Free',
         targetAudience: 'Öğrenciler',
@@ -47,7 +47,7 @@ const plans: PricingPlan[] = [
     },
     {
         id: 'starter',
-        name: 'Forge Starter',
+        name: 'Flippy Starter',
         price: 9,
         period: '/ay',
         targetAudience: 'Hobi & Küçük Projeler',
@@ -67,7 +67,7 @@ const plans: PricingPlan[] = [
     },
     {
         id: 'pro',
-        name: 'Forge Pro',
+        name: 'Flippy Pro',
         price: 19,
         period: '/ay',
         targetAudience: 'Profesyonel Geliştiriciler',
@@ -89,7 +89,7 @@ const plans: PricingPlan[] = [
     },
     {
         id: 'studio',
-        name: 'Forge Studio',
+        name: 'Flippy Enterprise',
         price: 49,
         period: '/kullanıcı',
         targetAudience: 'Oyun Stüdyoları',
@@ -117,7 +117,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, on
     const handleSubscribe = async (plan: PricingPlan) => {
         if (plan.price === 0) return; // Free plan
         if (plan.id === 'studio') {
-            window.location.href = 'mailto:sales@studioforge.ai';
+            window.location.href = 'mailto:sales@flippy.ai';
             return;
         }
 

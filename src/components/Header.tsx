@@ -30,7 +30,7 @@ const Header: React.FC = () => {
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100 font-bold">
                     <Menu size={20} className="text-zinc-500 dark:text-zinc-400" />
-                    <span>Studio Forge</span>
+                    <span>Flippy</span>
                 </div>
 
                 <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800 mx-2" />

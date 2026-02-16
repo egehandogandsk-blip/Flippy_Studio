@@ -94,7 +94,7 @@ export default function PublicProjectViewer() {
             {/* Footer */}
             <div className="h-12 bg-[#141414] border-t border-purple-500/20 flex items-center justify-center">
                 <p className="text-white/40 text-sm">
-                    Powered by <span className="text-purple-400 font-semibold">Studio Forge</span>
+                    Powered by <span className="text-purple-400 font-semibold">Flippy</span>
                 </p>
             </div>
         </div>

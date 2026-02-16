@@ -74,6 +74,7 @@ async function handleCheckoutComplete(session) {
     const planType = metadata?.planType || 'starter';
 
     await updateUserPlan(clerkId, planType, customer);
+    await updateClerkMetadata(clerkId, planType);
     console.log(`User ${clerkId} upgraded to ${planType}`);
 }
 
@@ -95,6 +96,7 @@ async function handleSubscriptionUpdate(subscription) {
 
     if (planType) {
         await updateUserPlan(user.clerkId, planType);
+        await updateClerkMetadata(user.clerkId, planType);
         console.log(`Subscription updated for user ${user.clerkId} to ${planType}`);
     }
 }
@@ -112,7 +114,9 @@ async function handleSubscriptionCancel(subscription) {
     }
 
     // Downgrade to lite plan
+    // Downgrade to lite plan
     await updateUserPlan(user.clerkId, 'lite');
+    await updateClerkMetadata(user.clerkId, 'lite');
     console.log(`User ${user.clerkId} downgraded to lite (subscription cancelled)`);
 }
 
@@ -124,4 +128,29 @@ function getPlanTypeFromPriceId(priceId) {
     };
 
     return pricePlans[priceId] || null;
+}
+
+async function updateClerkMetadata(userId, planType) {
+    try {
+        const response = await fetch(`https://api.clerk.com/v1/users/${userId}/metadata`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                public_metadata: {
+                    plan: planType
+                }
+            })
+        });
+
+        if (!response.ok) {
+            console.error('Failed to update Clerk metadata', await response.text());
+        } else {
+            console.log(`Updated Clerk metadata for ${userId} to ${planType}`);
+        }
+    } catch (e) {
+        console.error('Error updating Clerk metadata', e);
+    }
 }

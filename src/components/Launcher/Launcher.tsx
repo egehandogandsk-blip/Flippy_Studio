@@ -215,14 +215,14 @@ export const Launcher = () => {
                         <div className="w-12 h-12 bg-white rounded-xl mb-6 flex items-center justify-center shadow-lg">
                             <div className="w-8 h-8 bg-indigo-600 rounded-lg transform rotate-45" />
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight mb-2">Studio Forge</h1>
+                        <h1 className="text-3xl font-bold tracking-tight mb-2">Flippy</h1>
                         <p className="text-indigo-200 text-sm">Design & Prototype for the Future.</p>
                     </div>
 
                     <div className="relative z-10 text-xs text-indigo-300 space-y-1">
-                        <p className="font-medium text-white">Branchout Studio Team</p>
+                        <p className="font-medium text-white">Flippy Team</p>
                         <p>Version 2.8.0-beta</p>
-                        <p>© 2026 Studio Forge Inc.</p>
+                        <p>© 2026 Flippy Inc.</p>
                     </div>
                 </div>
 

@@ -15,10 +15,10 @@ export const AccountSection: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const tierLabels = {
-        lite: 'Forge Lite',
-        starter: 'Forge Starter',
-        pro: 'Forge Pro',
-        studio: 'Forge Studio'
+        lite: 'Flippy Lite',
+        starter: 'Flippy Starter',
+        pro: 'Flippy Pro',
+        studio: 'Flippy Enterprise'
     };
 
     const handleInputChange = (field: 'username' | 'email', value: string) => {
@@ -72,7 +72,7 @@ export const AccountSection: React.FC = () => {
     };
 
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(account.studioForgeId);
+        navigator.clipboard.writeText(account.flippyId);
     };
 
     return (
@@ -133,13 +133,13 @@ export const AccountSection: React.FC = () => {
                             />
                         </div>
 
-                        {/* Studio Forge ID */}
+                        {/* Flippy ID */}
                         <div>
-                            <label className="block text-white/70 text-sm mb-2">Studio Forge ID</label>
+                            <label className="block text-white/70 text-sm mb-2">Flippy ID</label>
                             <div className="flex gap-2">
                                 <input
                                     type="text"
-                                    value={account.studioForgeId}
+                                    value={account.flippyId}
                                     readOnly
                                     className="flex-1 bg-[#2C2C2C]/50 border border-purple-500/20 rounded-lg px-4 py-2 text-white/50 cursor-not-allowed"
                                 />

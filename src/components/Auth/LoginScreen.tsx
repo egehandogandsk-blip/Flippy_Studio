@@ -18,7 +18,7 @@ export const LoginScreen = () => {
                         <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
                             <Hexagon className="w-6 h-6 text-white fill-indigo-600" />
                         </div>
-                        <span className="text-2xl font-bold tracking-tight">Studio Forge</span>
+                        <span className="text-2xl font-bold tracking-tight">Flippy</span>
                     </div>
                 </div>
 
@@ -44,7 +44,7 @@ export const LoginScreen = () => {
                 </div>
 
                 <div className="relative z-10 text-xs text-zinc-600">
-                    © 2026 Studio Forge Inc. All rights reserved.
+                    © 2026 Flippy Inc. All rights reserved.
                 </div>
             </div>
 

@@ -114,7 +114,7 @@ export const IntegrationModal: React.FC = () => {
         return (
             <div className="space-y-4 h-full flex flex-col">
                 <div className="flex items-center justify-between px-1">
-                    <p className="text-sm text-zinc-500">Select screens to import into Studio Forge:</p>
+                    <p className="text-sm text-zinc-500">Select screens to import into Flippy:</p>
                     <span className="text-xs text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-full">
                         {engineState.availableScreens.length} Available
                     </span>

@@ -12,7 +12,7 @@ export const IntegrationSection: React.FC = () => {
     const mockRepos = [
         'username/awesome-project',
         'username/game-engine-assets',
-        'username/studio-forge-plugin'
+        'username/flippy-plugin'
     ];
 
     const handleGitHubConnect = () => {
@@ -77,7 +77,7 @@ export const IntegrationSection: React.FC = () => {
                     <div className="bg-[#1a1a1a] border border-purple-500/30 rounded-xl p-6 max-w-md w-full">
                         <h3 className="text-white font-bold text-lg mb-4">Authorize GitHub</h3>
                         <p className="text-white/70 mb-6">
-                            Studio Forge needs permission to access your GitHub repositories.
+                            Flippy needs permission to access your GitHub repositories.
                         </p>
                         <div className="flex gap-3">
                             <button

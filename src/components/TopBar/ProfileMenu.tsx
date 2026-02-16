@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { SignOutButton } from '@clerk/clerk-react';
+import { SignOutButton, useUser } from '@clerk/clerk-react';
 import { CreditCard, Settings, FolderOpen, ChevronDown, LogOut } from 'lucide-react';
 import { SubscriptionModal } from '../Subscription/SubscriptionModal';
 import { SettingsModal } from '../Settings/SettingsModal';
@@ -10,12 +10,14 @@ export const ProfileMenu: React.FC = () => {
     const [showSettings, setShowSettings] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    // Mock user data - replace with real auth later
+    const { user: clerkUser } = useUser();
+
+    // Derived user data
     const user = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-        membershipType: 'Free' as 'Free' | 'Pro'
+        name: clerkUser?.fullName || 'User',
+        email: clerkUser?.primaryEmailAddress?.emailAddress || '',
+        avatar: clerkUser?.imageUrl || '',
+        membershipType: (clerkUser?.publicMetadata?.plan as string === 'pro' || clerkUser?.publicMetadata?.plan as string === 'studio') ? 'Pro' : 'Free'
     };
 
     // Close dropdown when clicking outside

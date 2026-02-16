@@ -30,7 +30,7 @@ export interface SettingsState {
         userId: string;
         username: string;
         email: string;
-        studioForgeId: string;
+        flippyId: string;
         avatarUrl: string;
         tier: 'lite' | 'starter' | 'pro' | 'studio';
         twoFactorEnabled: boolean;
@@ -111,7 +111,7 @@ export const useSettingsStore = create<SettingsState>()(
                 userId: 'user_001',
                 username: 'John Doe',
                 email: 'john@example.com',
-                studioForgeId: 'SF-JD-2024',
+                flippyId: 'FL-JD-2024',
                 avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
                 tier: 'lite',
                 twoFactorEnabled: false,
@@ -271,7 +271,7 @@ export const useSettingsStore = create<SettingsState>()(
             }
         }),
         {
-            name: 'studio-forge-settings',
+            name: 'flippy-settings',
             // Only persist critical settings, not session data
             partialize: (state) => ({
                 account: {
