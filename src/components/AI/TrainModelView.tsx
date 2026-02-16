@@ -83,8 +83,13 @@ export const TrainModelView: React.FC = () => {
         await new Promise(r => setTimeout(r, 500));
 
         // Generate a style prompt based on folder name, description, and image count
-        const baseModifier = currentFolder.description
-            ? `${currentFolder.description}, ${currentFolder.name} style`
+        const imageDescriptions = currentFolder.images
+            .map(img => img.description)
+            .filter(desc => desc && desc.trim().length > 0)
+            .join(', ');
+
+        const baseModifier = imageDescriptions.length > 0
+            ? `${imageDescriptions}, ${currentFolder.name} style`
             : `in the style of ${currentFolder.name}, professional quality, detailed`;
 
         trainStyleFromFolder(currentFolder.id, currentFolder.name, baseModifier);
