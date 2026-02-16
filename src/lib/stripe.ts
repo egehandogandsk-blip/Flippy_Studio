@@ -19,7 +19,7 @@ export const PRICING_PLANS = {
     starter: {
         name: 'Forge Starter',
         price: 9,
-        priceId: import.meta.env.STRIPE_PRICE_STARTER,
+        priceId: import.meta.env.VITE_STRIPE_PRICE_STARTER,
         features: [
             '10 Projects',
             'AI Features',
@@ -30,7 +30,7 @@ export const PRICING_PLANS = {
     pro: {
         name: 'Forge Pro',
         price: 29,
-        priceId: import.meta.env.STRIPE_PRICE_PRO,
+        priceId: import.meta.env.VITE_STRIPE_PRICE_PRO,
         features: [
             'Unlimited Projects',
             'Advanced AI',
@@ -42,7 +42,7 @@ export const PRICING_PLANS = {
     studio: {
         name: 'Forge Studio',
         price: 99,
-        priceId: import.meta.env.STRIPE_PRICE_STUDIO,
+        priceId: import.meta.env.VITE_STRIPE_PRICE_STUDIO,
         features: [
             'Everything in Pro',
             'Custom Integrations',
