@@ -63,6 +63,19 @@ app.post('/api/generate-image', async (req, res) => {
     }
 });
 
+// Stripe Webhook endpoint - must use raw body for signature verification
+app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+    console.log('[Proxy] ===== STRIPE WEBHOOK =====');
+
+    try {
+        const { handleStripeWebhook } = await import('./src/api/stripeWebhook.mjs');
+        await handleStripeWebhook(req, res);
+    } catch (error) {
+        console.error('[Proxy] Webhook handler error:', error);
+        res.status(500).json({ error: 'Webhook processing failed' });
+    }
+});
+
 // NEW: Figma API Proxy
 app.get('/api/figma/file/:key', async (req, res) => {
     console.log('[Proxy] ===== FIGMA REQUEST =====');
