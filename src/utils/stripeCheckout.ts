@@ -19,12 +19,8 @@ export async function createCheckoutSession(planType: 'starter' | 'pro' | 'studi
             throw new Error('Stripe failed to load');
         }
 
-        const { error } = await stripe.redirectToCheckout({ sessionId });
-
-        if (error) {
-            console.error('Stripe checkout error:', error);
-            throw error;
-        }
+        // Redirect directly to checkout URL
+        window.location.href = `https://checkout.stripe.com/c/pay/${sessionId}`;
     } catch (error) {
         console.error('Checkout error:', error);
         throw error;

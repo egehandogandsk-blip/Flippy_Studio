@@ -22,7 +22,12 @@ type InteractionState =
     | { type: 'MARQUEE'; startX: number; startY: number; currentX: number; currentY: number }
     | { type: 'DRAWING'; tool: NodeType; startX: number; startY: number; currentX: number; currentY: number; modifiers: { shift: boolean } };
 
-export const InfiniteCanvas: React.FC = () => {
+interface InfiniteCanvasProps {
+    readonly?: boolean;
+    initialNodes?: Record<string, any>;
+}
+
+export const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ readonly = false, initialNodes }) => {
     const [transform, setTransform] = useState({ x: 100, y: 100, k: 1 });
     const containerRef = useRef<HTMLDivElement>(null);
     const [interaction, setInteraction] = useState<InteractionState>({ type: 'IDLE' });

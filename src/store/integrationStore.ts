@@ -11,6 +11,25 @@ export interface GameScreen {
     thumbnail?: string; // Placeholder for future
 }
 
+interface EngineConfig {
+    isConnected: boolean;
+    repoUrl: string;
+    lastSynced: string | null;
+    hasChanges: boolean;
+    availableScreens: GameScreen[];
+}
+
+interface IntegrationState {
+    isModalOpen: boolean;
+    activeEngine: EngineType | null;
+    engines: Record<EngineType, EngineConfig>;
+    openModal: (engine: EngineType) => void;
+    closeModal: () => void;
+    connectRepo: (engine: EngineType, url: string) => Promise<void>;
+    toggleScreenSelection: (engine: EngineType, screenId: string) => void;
+    syncChanges: (engine: EngineType) => Promise<void>;
+}
+
 // ...
 
 // Mock Data

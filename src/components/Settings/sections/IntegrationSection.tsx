@@ -234,7 +234,11 @@ export const IntegrationSection: React.FC = () => {
                                 value={integration.apiKeys?.stableDiffusion || ''}
                                 onChange={(e) =>
                                     updateIntegration({
-                                        apiKeys: { ...(integration.apiKeys || {}), stableDiffusion: e.target.value }
+                                        apiKeys: {
+                                            stableDiffusion: e.target.value,
+                                            layerAI: integration.apiKeys?.layerAI || '',
+                                            custom: integration.apiKeys?.custom || ''
+                                        }
                                     })
                                 }
                                 placeholder="sk-..."
@@ -249,7 +253,11 @@ export const IntegrationSection: React.FC = () => {
                                 value={integration.apiKeys?.layerAI || ''}
                                 onChange={(e) =>
                                     updateIntegration({
-                                        apiKeys: { ...(integration.apiKeys || {}), layerAI: e.target.value }
+                                        apiKeys: {
+                                            stableDiffusion: integration.apiKeys?.stableDiffusion || '',
+                                            layerAI: e.target.value,
+                                            custom: integration.apiKeys?.custom || ''
+                                        }
                                     })
                                 }
                                 placeholder="layer-..."
