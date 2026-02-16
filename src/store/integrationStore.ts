@@ -28,6 +28,8 @@ interface IntegrationState {
     connectRepo: (engine: EngineType, url: string) => Promise<void>;
     toggleScreenSelection: (engine: EngineType, screenId: string) => void;
     syncChanges: (engine: EngineType) => Promise<void>;
+    importScreens: (engine: EngineType) => Promise<void>;
+    pushChanges: (engine: EngineType) => Promise<void>;
 }
 
 // ...
