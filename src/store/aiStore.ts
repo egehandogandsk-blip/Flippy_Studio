@@ -191,8 +191,11 @@ export const useAIStore = create<AIState>()(
             name: 'ai-storage-v3', // Updated version to force fresh state for new schema
             partialize: (state) => ({
                 // DO NOT persist base64 images - they fill localStorage!
-                // Only persist trained style metadata
-                trainedStyles: state.trainedStyles,
+                // Only persist trained style metadata without thumbnails
+                trainedStyles: state.trainedStyles.map(style => ({
+                    ...style,
+                    thumbnail: '' // Do not persist base64 thumbnail
+                })),
                 // Save folder structure but NOT images
                 trainingFolders: state.trainingFolders.map(f => ({
                     ...f,

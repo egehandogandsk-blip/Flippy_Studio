@@ -82,21 +82,34 @@ export const TrainModelView: React.FC = () => {
         setTrainingProgress(100);
         await new Promise(r => setTimeout(r, 500));
 
-        // Generate a style prompt based on folder name, description, and image count
-        const imageDescriptions = currentFolder.images
-            .map(img => img.description)
-            .filter(desc => desc && desc.trim().length > 0)
-            .join(', ');
+        try {
+            // Generate a style prompt based on folder name, description, and image count
+            const imageDescriptions = currentFolder.images
+                .map(img => img.description)
+                .filter(desc => desc && desc.trim().length > 0)
+                .join(', ');
 
-        const baseModifier = imageDescriptions.length > 0
-            ? `${imageDescriptions}, ${currentFolder.name} style`
-            : `in the style of ${currentFolder.name}, professional quality, detailed`;
+            const baseModifier = imageDescriptions.length > 0
+                ? `${imageDescriptions}, ${currentFolder.name} style`
+                : `in the style of ${currentFolder.name}, professional quality, detailed`;
 
-        trainStyleFromFolder(currentFolder.id, currentFolder.name, baseModifier);
+            // This might throw QuotaExceededError if localStorage is full
+            trainStyleFromFolder(currentFolder.id, currentFolder.name, baseModifier);
 
-        setIsTraining(false);
-        setTrainingStep('');
-        setTrainingProgress(0);
+            setIsTraining(false);
+            setTrainingStep('');
+            setTrainingProgress(0);
+        } catch (error) {
+            console.error('Training failed:', error);
+            setIsTraining(false);
+            setTrainingStep('Error saving model (Storage Full)');
+            // Keep error visible for a moment
+            setTimeout(() => {
+                setTrainingStep('');
+                setTrainingProgress(0);
+            }, 3000);
+            alert("Failed to save model: Local Storage is full. Please clear some browser data or delete old models.");
+        }
     };
 
     return (
