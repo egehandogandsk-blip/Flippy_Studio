@@ -62,7 +62,7 @@ export const FloatingToolbar: React.FC = () => {
         <div
             ref={toolbarRef}
             className={clsx(
-                "fixed bg-[#2C2C2C] border border-[#3C3C3C] rounded-xl shadow-lg p-2 flex items-center gap-1 z-50 hover:shadow-xl transition-shadow",
+                "fixed bg-[#2C2C2C] border border-[#3C3C3C] rounded-xl shadow-lg p-2 flex items-center gap-1 z-[200] hover:shadow-xl transition-shadow",
                 "flex items-center gap-1 p-2",
                 isDragging ? "cursor-grabbing" : "cursor-grab"
             )}
