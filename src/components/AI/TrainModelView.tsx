@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { FolderPlus, Upload, Trash2, Sparkles, ArrowLeft, Check } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { FolderPlus, Upload, Trash2, Sparkles, ArrowLeft, Check, Loader2, Info } from 'lucide-react';
 import { useAIStore } from '../../store/aiStore';
 
 export const TrainModelView: React.FC = () => {
@@ -11,12 +11,15 @@ export const TrainModelView: React.FC = () => {
         addImageToFolder,
         trainStyleFromFolder,
         deleteFolder,
-        setViewMode
+        setViewMode,
+        setFolderDescription
     } = useAIStore();
 
     const [newFolderName, setNewFolderName] = useState('');
     const [showNewFolderInput, setShowNewFolderInput] = useState(false);
     const [isTraining, setIsTraining] = useState(false);
+    const [trainingStep, setTrainingStep] = useState<string>('');
+    const [trainingProgress, setTrainingProgress] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const currentFolder = trainingFolders.find(f => f.id === currentFolderId);
@@ -49,15 +52,46 @@ export const TrainModelView: React.FC = () => {
         if (!currentFolder) return;
 
         setIsTraining(true);
+        const steps = [
+            { msg: 'Analyzing image dataset...', duration: 2000 },
+            { msg: 'Extracting key features...', duration: 2500 },
+            { msg: 'Fine-tuning style model...', duration: 3000 },
+            { msg: 'Finalizing style parameters...', duration: 1500 }
+        ];
 
-        // Simulate AI analysis (in real scenario, you might call an interrogate API)
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        let accumulatedTime = 0;
 
-        // Generate a style prompt based on folder name and image count
-        const promptModifier = `in the style of ${currentFolder.name}, professional quality, detailed`;
-        trainStyleFromFolder(currentFolder.id, currentFolder.name, promptModifier);
+        for (const step of steps) {
+            setTrainingStep(step.msg);
+            const stepStart = Date.now();
+
+            // Progress animation loop for this step
+            while (Date.now() - stepStart < step.duration) {
+                const elapsed = Date.now() - stepStart;
+                const stepProgress = (elapsed / step.duration) * (100 / steps.length);
+                const totalProgress = (accumulatedTime / 9000 * 100) + stepProgress; // approx based on total duration
+
+                setTrainingProgress(Math.min(99, totalProgress));
+                await new Promise(r => setTimeout(r, 50));
+            }
+
+            accumulatedTime += step.duration;
+        }
+
+        setTrainingStep('Saving model...');
+        setTrainingProgress(100);
+        await new Promise(r => setTimeout(r, 500));
+
+        // Generate a style prompt based on folder name, description, and image count
+        const baseModifier = currentFolder.description
+            ? `${currentFolder.description}, ${currentFolder.name} style`
+            : `in the style of ${currentFolder.name}, professional quality, detailed`;
+
+        trainStyleFromFolder(currentFolder.id, currentFolder.name, baseModifier);
 
         setIsTraining(false);
+        setTrainingStep('');
+        setTrainingProgress(0);
     };
 
     return (
@@ -112,8 +146,8 @@ export const TrainModelView: React.FC = () => {
                         <div
                             key={folder.id}
                             className={`group flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors ${currentFolderId === folder.id
-                                    ? 'bg-purple-600/30 border border-purple-500/50'
-                                    : 'bg-[#2C2C2C] hover:bg-[#333] border border-transparent'
+                                ? 'bg-purple-600/30 border border-purple-500/50'
+                                : 'bg-[#2C2C2C] hover:bg-[#333] border border-transparent'
                                 }`}
                             onClick={() => selectFolder(folder.id)}
                         >
@@ -166,8 +200,8 @@ export const TrainModelView: React.FC = () => {
                                 onClick={handleTrainStyle}
                                 disabled={!canTrain || isTraining}
                                 className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold transition-all ${canTrain
-                                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white'
-                                        : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white'
+                                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                                     }`}
                             >
                                 {isTraining ? (
@@ -195,8 +229,8 @@ export const TrainModelView: React.FC = () => {
                                         key={index}
                                         onClick={() => isEmpty && currentFolder.images.length < 10 && fileInputRef.current?.click()}
                                         className={`aspect-square rounded-lg border-2 border-dashed flex items-center justify-center overflow-hidden transition-all ${isEmpty
-                                                ? 'border-purple-500/30 bg-[#1a1a1a] hover:border-purple-500/50 hover:bg-[#222] cursor-pointer'
-                                                : 'border-purple-500/50 bg-[#2C2C2C] cursor-default'
+                                            ? 'border-purple-500/30 bg-[#1a1a1a] hover:border-purple-500/50 hover:bg-[#222] cursor-pointer'
+                                            : 'border-purple-500/50 bg-[#2C2C2C] cursor-default'
                                             }`}
                                     >
                                         {isEmpty ? (
@@ -213,7 +247,6 @@ export const TrainModelView: React.FC = () => {
                             })}
                         </div>
 
-                        {/* Hidden File Input */}
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -222,6 +255,55 @@ export const TrainModelView: React.FC = () => {
                             onChange={handleImageUpload}
                             className="hidden"
                         />
+
+                        {/* Concept Description Input */}
+                        <div className="mt-6 p-4 bg-[#2C2C2C] rounded-lg border border-purple-500/10">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Info size={14} className="text-purple-400" />
+                                <label className="text-sm font-medium text-white/90">Concept Description</label>
+                            </div>
+                            <textarea
+                                value={currentFolder.description || ''}
+                                onChange={(e) => {
+                                    const text = e.target.value;
+                                    const words = text.trim().split(/\s+/);
+                                    if (text.length === 0 || words.length <= 30) {
+                                        setFolderDescription(currentFolder.id, text);
+                                    }
+                                }}
+                                placeholder="Describe the style or subject (e.g. 'isometric 3d icons with soft clay finish, pastel colors'). This will be used to enhance generation consistency."
+                                className="w-full h-20 bg-[#1a1a1a] border border-zinc-700 rounded-md p-3 text-sm text-white focus:border-purple-500 focus:outline-none resize-none placeholder:text-zinc-500"
+                            />
+                            <div className="flex justify-end mt-1">
+                                <span className={`text-xs ${(currentFolder.description?.trim().split(/\s+/).length || 0) > 30
+                                    ? 'text-red-400'
+                                    : 'text-zinc-500'
+                                    }`}>
+                                    {currentFolder.description ? currentFolder.description.trim().split(/\s+/).filter(w => w).length : 0}/30 words
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Training Overlay */}
+                        {isTraining && (
+                            <div className="absolute inset-0 bg-black/80 z-10 flex flex-col items-center justify-center backdrop-blur-sm rounded-lg">
+                                <div className="w-64 space-y-4">
+                                    <div className="flex items-center justify-center gap-3 text-purple-400">
+                                        <Loader2 size={32} className="animate-spin" />
+                                        <span className="text-lg font-bold">{Math.round(trainingProgress)}%</span>
+                                    </div>
+                                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-300"
+                                            style={{ width: `${trainingProgress}%` }}
+                                        />
+                                    </div>
+                                    <p className="text-center text-white/80 text-sm animate-pulse">
+                                        {trainingStep}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Info Footer */}
                         {currentFolder.isTrained && (

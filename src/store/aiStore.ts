@@ -14,6 +14,7 @@ export interface TrainingFolder {
     id: string;
     name: string;
     images: string[]; // Base64 or URLs
+    description?: string;
     isTrained: boolean;
     trainedStyleId?: string;
     createdAt: number;
@@ -23,6 +24,7 @@ export interface AIStyle {
     id: string;
     name: string;
     promptModifier: string; // The "learned" style prompt
+    description?: string;
     thumbnail: string;
 }
 
@@ -65,6 +67,7 @@ interface AIState {
     addImageToFolder: (folderId: string, image: string) => void;
     trainStyleFromFolder: (folderId: string, styleName: string, promptModifier: string) => void;
     deleteFolder: (id: string) => void;
+    setFolderDescription: (id: string, description: string) => void;
 }
 
 export const useAIStore = create<AIState>()(
@@ -109,6 +112,7 @@ export const useAIStore = create<AIState>()(
                 const newFolder: TrainingFolder = {
                     id: Date.now().toString(),
                     name,
+                    description: '',
                     images: [],
                     isTrained: false,
                     createdAt: Date.now()
@@ -118,6 +122,12 @@ export const useAIStore = create<AIState>()(
                     currentFolderId: newFolder.id
                 }));
             },
+
+            setFolderDescription: (id, description) => set((state) => ({
+                trainingFolders: state.trainingFolders.map(f =>
+                    f.id === id ? { ...f, description } : f
+                )
+            })),
 
             selectFolder: (id) => set({ currentFolderId: id }),
 
@@ -138,7 +148,8 @@ export const useAIStore = create<AIState>()(
                     id: `style-${Date.now()}`,
                     name: styleName,
                     promptModifier,
-                    thumbnail: folder.images[0] // Use first image as thumbnail
+                    thumbnail: folder.images[0], // Use first image as thumbnail
+                    description: folder.description
                 };
 
                 set((state) => ({
