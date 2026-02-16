@@ -14,7 +14,7 @@ interface ImageGenerationResponse {
 }
 
 export class NanoBananaService {
-    private proxyUrl = 'http://localhost:3001/api/generate-image';
+    private proxyUrl = '/api/generate-image';
 
     async generateImage(params: ImageGenerationParams): Promise<ImageGenerationResponse> {
         console.log(`[NanoBananaService] ===== STARTING GENERATION =====`);

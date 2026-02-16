@@ -21,6 +21,7 @@
     "clsx": "^2.1.1",
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "framer-motion": "^12.34.0",
     "html-to-image": "^1.11.13",
     "immer": "^11.1.4",
     "jspdf": "^4.1.0",
@@ -32,6 +33,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.13.0",
     "stripe": "^20.3.1",
+    "tailwind-merge": "^3.4.1",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
