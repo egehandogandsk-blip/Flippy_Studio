@@ -16,6 +16,7 @@ app.post('/api/generate-image', async (req, res) => {
     try {
         const { prompt } = req.body;
 
+
         if (!prompt) {
             console.error('[Proxy] No prompt provided');
             return res.status(400).json({ error: 'Prompt is required' });
@@ -151,6 +152,21 @@ async function processResponse(response, res) {
 
     res.json({ imageUrl: dataUrl });
 }
+
+// Stripe Checkout Session Proxy
+app.post('/api/stripe/create-checkout-session', async (req, res) => {
+    console.log('[Proxy] ===== CREATE CHECKOUT SESSION =====');
+    try {
+        // Dynamic import of the API handler from the root api folder
+        // Note: In a real Vercel env, this runs as a standalone function.
+        // Here we import it to simulate the behavior.
+        const handler = (await import('./api/stripe/create-checkout-session.js')).default;
+        await handler(req, res);
+    } catch (error) {
+        console.error('[Proxy] Checkout session error:', error);
+        res.status(500).json({ error: 'Checkout session creation failed', details: error.message });
+    }
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {

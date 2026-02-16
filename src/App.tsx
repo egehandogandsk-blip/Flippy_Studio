@@ -1,5 +1,6 @@
 import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-react';
 import { useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { InfiniteCanvas } from './components/Canvas/InfiniteCanvas';
 import { LayerTree } from './components/Sidebar/LayerTree';
 import { PropertyPanel } from './components/Properties/PropertyPanel';
@@ -9,6 +10,8 @@ import { AIModal } from './components/AI/AIModal';
 import { IntegrationModal } from './components/Integration/IntegrationModal';
 import { Launcher } from './components/Launcher/Launcher';
 import { LoginScreen } from './components/Auth/LoginScreen';
+import { SubscriptionSuccess } from './components/Subscription/SubscriptionSuccess';
+import { SubscriptionCancel } from './components/Subscription/SubscriptionCancel';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useUiStore } from './store/uiStore';
 import { initializeTheme } from './store/themeStore';
@@ -52,21 +55,29 @@ function App() {
         theme === 'dark' ? 'dark bg-zinc-950 text-zinc-100' : 'bg-gray-50 text-zinc-900'
       )}>
         <SignedIn>
-          <TopBar />
-          <FloatingToolbar />
-          <AIModal />
-          <IntegrationModal />
-          <Launcher />
+          <Routes>
+            <Route path="/subscription/success" element={<SubscriptionSuccess />} />
+            <Route path="/subscription/cancel" element={<SubscriptionCancel />} />
+            <Route path="*" element={
+              <>
+                <TopBar />
+                <FloatingToolbar />
+                <AIModal />
+                <IntegrationModal />
+                <Launcher />
 
-          <div className="flex flex-1 overflow-hidden">
-            <LayerTree />
-            <div className="flex-1 relative bg-transparent">
-              <InfiniteCanvas />
-            </div>
-            <div className="flex border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 w-80 transition-colors duration-200">
-              <PropertyPanel />
-            </div>
-          </div>
+                <div className="flex flex-1 overflow-hidden">
+                  <LayerTree />
+                  <div className="flex-1 relative bg-transparent">
+                    <InfiniteCanvas />
+                  </div>
+                  <div className="flex border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 w-80 transition-colors duration-200">
+                    <PropertyPanel />
+                  </div>
+                </div>
+              </>
+            } />
+          </Routes>
         </SignedIn>
 
         <SignedOut>

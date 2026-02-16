@@ -1,5 +1,7 @@
-import React from 'react';
-import { X, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Check, Loader2 } from 'lucide-react';
+import { createCheckoutSession } from '../../utils/stripeCheckout';
+import { useUser } from '@clerk/clerk-react';
 
 interface SubscriptionModalProps {
     isOpen: boolean;
@@ -7,6 +9,7 @@ interface SubscriptionModalProps {
 }
 
 interface PricingPlan {
+    id: 'lite' | 'starter' | 'pro' | 'studio';
     name: string;
     price: number;
     period: string;
@@ -23,6 +26,7 @@ interface PricingPlan {
 
 const plans: PricingPlan[] = [
     {
+        id: 'lite',
         name: 'Forge Lite',
         price: 0,
         period: 'Free',
@@ -42,6 +46,7 @@ const plans: PricingPlan[] = [
         ]
     },
     {
+        id: 'starter',
         name: 'Forge Starter',
         price: 9,
         period: '/ay',
@@ -61,6 +66,7 @@ const plans: PricingPlan[] = [
         ]
     },
     {
+        id: 'pro',
         name: 'Forge Pro',
         price: 19,
         period: '/ay',
@@ -82,6 +88,7 @@ const plans: PricingPlan[] = [
         ]
     },
     {
+        id: 'studio',
         name: 'Forge Studio',
         price: 49,
         period: '/kullanıcı',
@@ -104,6 +111,28 @@ const plans: PricingPlan[] = [
 ];
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose }) => {
+    const { user } = useUser();
+    const [loading, setLoading] = useState<string | null>(null);
+
+    const handleSubscribe = async (plan: PricingPlan) => {
+        if (plan.price === 0) return; // Free plan
+        if (plan.id === 'studio') {
+            window.location.href = 'mailto:sales@studioforge.ai';
+            return;
+        }
+
+        try {
+            setLoading(plan.id);
+            // In a real app, pass user ID/email to pre-fill checkout
+            await createCheckoutSession(plan.id as 'starter' | 'pro' | 'studio');
+        } catch (error) {
+            console.error('Subscription error:', error);
+            // Show error toast
+        } finally {
+            setLoading(null);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -168,15 +197,21 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, on
 
                             {/* CTA Button */}
                             <button
-                                className={`w-full py-2 rounded-lg font-semibold text-sm transition-all ${plan.recommended
+                                onClick={() => handleSubscribe(plan)}
+                                disabled={plan.price === 0 || loading === plan.id}
+                                className={`w-full py-2 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 ${plan.recommended
                                     ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white'
                                     : plan.price === 0
                                         ? 'bg-[#2C2C2C] text-white/50 cursor-not-allowed'
                                         : 'bg-[#2C2C2C] hover:bg-[#3C3C3C] text-white'
                                     }`}
-                                disabled={plan.price === 0}
                             >
-                                {plan.ctaText}
+                                {loading === plan.id ? (
+                                    <>
+                                        <Loader2 size={16} className="animate-spin" />
+                                        Processing...
+                                    </>
+                                ) : plan.ctaText}
                             </button>
                         </div>
                     ))}
