@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(uuid())
+  clerkId           String    @unique
+  email             String    @unique
+  name              String?
+  avatarUrl         String?
+  stripeCustomerId  String?   @unique
+  planType          String    @default("lite") // lite, starter, pro, studio
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  projects          Project[]
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  thumbnail   String?
+  data        Json     // Canvas node data
+  isPublic    Boolean  @default(false)
+  publicUrl   String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([publicUrl])
+}
