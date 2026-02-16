@@ -55,7 +55,7 @@ export const LoginScreen = () => {
                 {/* Glow Effect */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-                <div className="w-full max-w-lg relative z-10 bg-zinc-900/50 backdrop-blur-xl border border-white/5 p-8 rounded-3xl shadow-2xl">
+                <div className="w-full max-w-lg relative z-10 backdrop-blur-xl rounded-3xl p-8">
                     <SignIn
                         appearance={{
                             layout: {
@@ -76,8 +76,9 @@ export const LoginScreen = () => {
                                 card: "bg-transparent shadow-none border-none p-0 w-full",
                                 headerTitle: "text-3xl font-bold text-white mb-2",
                                 headerSubtitle: "text-zinc-400 text-base mb-6",
-                                socialButtonsBlockButton: "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 text-white h-12 rounded-xl transition-all",
+                                socialButtonsBlockButton: "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 text-white h-12 rounded-xl transition-all relative",
                                 socialButtonsBlockButtonText: "font-medium text-white",
+                                socialButtonsProviderIcon: "mr-2",
                                 dividerLine: "bg-zinc-800",
                                 dividerText: "text-zinc-500 bg-transparent px-3",
                                 formFieldLabel: "text-zinc-400 font-medium",
