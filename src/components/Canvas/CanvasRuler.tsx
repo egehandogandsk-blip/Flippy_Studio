@@ -41,14 +41,15 @@ export const CanvasRuler: React.FC<CanvasRulerProps> = ({ orientation, transform
 
     return (
         <div
-            className="absolute bg-zinc-900 border-zinc-700 select-none"
+            className="absolute select-none backdrop-blur-md bg-zinc-900/40 border-zinc-700/50 transition-colors"
             style={{
                 [isHorizontal ? 'top' : 'left']: 0,
                 [isHorizontal ? 'left' : 'top']: isHorizontal ? rulerSize : 0,
                 [isHorizontal ? 'width' : 'height']: `calc(100% - ${rulerSize}px)`,
                 [isHorizontal ? 'height' : 'width']: rulerSize,
-                [isHorizontal ? 'borderBottom' : 'borderRight']: '1px solid',
-                zIndex: 100
+                [isHorizontal ? 'borderBottom' : 'borderRight']: '1px solid rgba(82, 82, 91, 0.5)',
+                zIndex: 100,
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
             }}
         >
             {ticks.map((tick, index) => (

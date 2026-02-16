@@ -81,7 +81,7 @@ export const TopBar: React.FC = () => {
             <div className="flex items-center gap-1">
                 <div className="flex items-center gap-2 mr-4">
                     <Flame size={20} className="text-indigo-500" strokeWidth={1.5} />
-                    <span className="text-white font-semibold text-sm">Forge</span>
+                    <span className="text-white font-semibold text-sm">Flippy</span>
                 </div>
 
                 <MenuItem label="File" items={menuData.file} onSelect={handleFileAction} />
