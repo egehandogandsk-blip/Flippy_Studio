@@ -12,7 +12,7 @@ export const TrainModelView: React.FC = () => {
         trainStyleFromFolder,
         deleteFolder,
         setViewMode,
-        setFolderDescription
+        updateImageDescription
     } = useAIStore();
 
     const [newFolderName, setNewFolderName] = useState('');
@@ -175,7 +175,7 @@ export const TrainModelView: React.FC = () => {
             </div>
 
             {/* Right Panel - Image Grid */}
-            <div className="flex-1 p-6 flex flex-col">
+            <div className="flex-1 p-6 flex flex-col overflow-y-auto">
                 {!currentFolder ? (
                     <div className="flex-1 flex items-center justify-center text-gray-500">
                         <div className="text-center">
@@ -219,27 +219,41 @@ export const TrainModelView: React.FC = () => {
                         </div>
 
                         {/* Image Grid */}
-                        <div className="grid grid-cols-5 gap-4">
+                        <div className="grid grid-cols-4 gap-6">
                             {Array.from({ length: 10 }).map((_, index) => {
                                 const image = currentFolder.images[index];
                                 const isEmpty = !image;
 
                                 return (
                                     <div
-                                        key={index}
-                                        onClick={() => isEmpty && currentFolder.images.length < 10 && fileInputRef.current?.click()}
-                                        className={`aspect-square rounded-lg border-2 border-dashed flex items-center justify-center overflow-hidden transition-all ${isEmpty
-                                            ? 'border-purple-500/30 bg-[#1a1a1a] hover:border-purple-500/50 hover:bg-[#222] cursor-pointer'
-                                            : 'border-purple-500/50 bg-[#2C2C2C] cursor-default'
-                                            }`}
+                                        key={image ? image.id : index}
+                                        className="flex flex-col gap-2"
                                     >
-                                        {isEmpty ? (
-                                            <Upload size={24} className="text-gray-600" />
-                                        ) : (
-                                            <img
-                                                src={image}
-                                                alt={`Training ${index + 1}`}
-                                                className="w-full h-full object-cover"
+                                        <div
+                                            onClick={() => isEmpty && currentFolder.images.length < 10 && fileInputRef.current?.click()}
+                                            className={`aspect-square rounded-lg border-2 border-dashed flex items-center justify-center overflow-hidden transition-all relative ${isEmpty
+                                                ? 'border-purple-500/30 bg-[#1a1a1a] hover:border-purple-500/50 hover:bg-[#222] cursor-pointer'
+                                                : 'border-purple-500/50 bg-[#2C2C2C] cursor-default'
+                                                }`}
+                                        >
+                                            {isEmpty ? (
+                                                <Upload size={24} className="text-gray-600" />
+                                            ) : (
+                                                <img
+                                                    src={image.url}
+                                                    alt={`Training ${index + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            )}
+                                        </div>
+
+                                        {!isEmpty && (
+                                            <input
+                                                type="text"
+                                                value={image.description}
+                                                onChange={(e) => updateImageDescription(currentFolder.id, image.id, e.target.value)}
+                                                placeholder="Describe this image..."
+                                                className="w-full px-3 py-2 bg-[#2C2C2C] border border-zinc-700 rounded text-xs text-white focus:border-purple-500 focus:outline-none placeholder:text-zinc-600 transition-colors"
                                             />
                                         )}
                                     </div>
@@ -255,34 +269,6 @@ export const TrainModelView: React.FC = () => {
                             onChange={handleImageUpload}
                             className="hidden"
                         />
-
-                        {/* Concept Description Input */}
-                        <div className="mt-6 p-4 bg-[#2C2C2C] rounded-lg border border-purple-500/10">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Info size={14} className="text-purple-400" />
-                                <label className="text-sm font-medium text-white/90">Concept Description</label>
-                            </div>
-                            <textarea
-                                value={currentFolder.description || ''}
-                                onChange={(e) => {
-                                    const text = e.target.value;
-                                    const words = text.trim().split(/\s+/);
-                                    if (text.length === 0 || words.length <= 30) {
-                                        setFolderDescription(currentFolder.id, text);
-                                    }
-                                }}
-                                placeholder="Describe the style or subject (e.g. 'isometric 3d icons with soft clay finish, pastel colors'). This will be used to enhance generation consistency."
-                                className="w-full h-20 bg-[#1a1a1a] border border-zinc-700 rounded-md p-3 text-sm text-white focus:border-purple-500 focus:outline-none resize-none placeholder:text-zinc-500"
-                            />
-                            <div className="flex justify-end mt-1">
-                                <span className={`text-xs ${(currentFolder.description?.trim().split(/\s+/).length || 0) > 30
-                                    ? 'text-red-400'
-                                    : 'text-zinc-500'
-                                    }`}>
-                                    {currentFolder.description ? currentFolder.description.trim().split(/\s+/).filter(w => w).length : 0}/30 words
-                                </span>
-                            </div>
-                        </div>
 
                         {/* Training Overlay */}
                         {isTraining && (
@@ -307,9 +293,10 @@ export const TrainModelView: React.FC = () => {
 
                         {/* Info Footer */}
                         {currentFolder.isTrained && (
-                            <div className="mt-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                                <p className="text-green-400 text-sm">
-                                    ✓ This style has been trained and is now available in "Make with Gen AI"
+                            <div className="mt-8 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                                <p className="text-green-400 text-sm flex items-center gap-2">
+                                    <Check size={16} />
+                                    This style has been trained using your image descriptions and is now available in "Make with Gen AI"
                                 </p>
                             </div>
                         )}

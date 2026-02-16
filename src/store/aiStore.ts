@@ -10,11 +10,16 @@ export interface GeneratedImage {
     styleId?: string;
 }
 
+export interface TrainingImage {
+    id: string;
+    url: string; // Base64 or URL
+    description: string;
+}
+
 export interface TrainingFolder {
     id: string;
     name: string;
-    images: string[]; // Base64 or URLs
-    description?: string;
+    images: TrainingImage[];
     isTrained: boolean;
     trainedStyleId?: string;
     createdAt: number;
@@ -65,6 +70,7 @@ interface AIState {
     createFolder: (name: string) => void;
     selectFolder: (id: string) => void;
     addImageToFolder: (folderId: string, image: string) => void;
+    updateImageDescription: (folderId: string, imageId: string, description: string) => void;
     trainStyleFromFolder: (folderId: string, styleName: string, promptModifier: string) => void;
     deleteFolder: (id: string) => void;
     setFolderDescription: (id: string, description: string) => void;
@@ -112,7 +118,6 @@ export const useAIStore = create<AIState>()(
                 const newFolder: TrainingFolder = {
                     id: Date.now().toString(),
                     name,
-                    description: '',
                     images: [],
                     isTrained: false,
                     createdAt: Date.now()
@@ -123,9 +128,16 @@ export const useAIStore = create<AIState>()(
                 }));
             },
 
-            setFolderDescription: (id, description) => set((state) => ({
+            updateImageDescription: (folderId, imageId, description) => set((state) => ({
                 trainingFolders: state.trainingFolders.map(f =>
-                    f.id === id ? { ...f, description } : f
+                    f.id === folderId
+                        ? {
+                            ...f,
+                            images: f.images.map(img =>
+                                img.id === imageId ? { ...img, description } : img
+                            )
+                        }
+                        : f
                 )
             })),
 
@@ -134,7 +146,14 @@ export const useAIStore = create<AIState>()(
             addImageToFolder: (folderId, image) => set((state) => ({
                 trainingFolders: state.trainingFolders.map(f =>
                     f.id === folderId
-                        ? { ...f, images: [...f.images, image] }
+                        ? {
+                            ...f,
+                            images: [...f.images, {
+                                id: Date.now().toString(),
+                                url: image,
+                                description: ''
+                            }]
+                        }
                         : f
                 )
             })),
@@ -148,8 +167,7 @@ export const useAIStore = create<AIState>()(
                     id: `style-${Date.now()}`,
                     name: styleName,
                     promptModifier,
-                    thumbnail: folder.images[0], // Use first image as thumbnail
-                    description: folder.description
+                    thumbnail: folder.images[0]?.url || '', // Use first image as thumbnail
                 };
 
                 set((state) => ({
@@ -165,10 +183,12 @@ export const useAIStore = create<AIState>()(
             deleteFolder: (id) => set((state) => ({
                 trainingFolders: state.trainingFolders.filter(f => f.id !== id),
                 currentFolderId: state.currentFolderId === id ? null : state.currentFolderId
-            }))
+            })),
+
+            setFolderDescription: (id, description) => { } // Deprecated but kept for type safety
         }),
         {
-            name: 'ai-storage-v2', // Updated version to force fresh state if needed, or handle migration
+            name: 'ai-storage-v3', // Updated version to force fresh state for new schema
             partialize: (state) => ({
                 // DO NOT persist base64 images - they fill localStorage!
                 // Only persist trained style metadata
@@ -179,7 +199,18 @@ export const useAIStore = create<AIState>()(
                     images: [], // Clear images to save space
                     imageCount: f.images.length // Just track count
                 }))
-            })
+            }),
+            version: 3,
+            migrate: (persistedState: any, version: number) => {
+                if (version < 3) {
+                    return {
+                        ...persistedState,
+                        trainingFolders: [],
+                        trainedStyles: []
+                    };
+                }
+                return persistedState;
+            }
         }
     )
 );
