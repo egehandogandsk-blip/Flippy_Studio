@@ -23,6 +23,7 @@ export const FloatingToolbar: React.FC = () => {
     const toolbarRef = useRef<HTMLDivElement>(null);
 
     const handleMouseDown = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent canvas selection from triggering
         if (e.target === toolbarRef.current || (e.target as HTMLElement).closest('.toolbar-handle')) {
             setIsDragging(true);
             setDragOffset({
