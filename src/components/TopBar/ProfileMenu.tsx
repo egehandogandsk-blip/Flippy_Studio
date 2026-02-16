@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CreditCard, Settings, FolderOpen, ChevronDown } from 'lucide-react';
+import { SignOutButton } from '@clerk/clerk-react';
+import { CreditCard, Settings, FolderOpen, ChevronDown, LogOut } from 'lucide-react';
 import { SubscriptionModal } from '../Subscription/SubscriptionModal';
 import { SettingsModal } from '../Settings/SettingsModal';
 
@@ -146,6 +147,20 @@ export const ProfileMenu: React.FC = () => {
                                     </div>
                                 </button>
                             ))}
+
+                            <div className="border-t border-purple-500/10 mt-1 pt-1">
+                                <SignOutButton>
+                                    <button className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-red-500/10 transition-colors group">
+                                        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 group-hover:bg-red-500/20 transition-colors">
+                                            <LogOut size={16} className="text-red-400" />
+                                        </div>
+                                        <div className="flex-1 text-left">
+                                            <p className="text-red-400 text-sm font-medium">Log Out</p>
+                                            <p className="text-red-400/50 text-xs">Sign out of your account</p>
+                                        </div>
+                                    </button>
+                                </SignOutButton>
+                            </div>
                         </div>
                     </div>
                 )}
