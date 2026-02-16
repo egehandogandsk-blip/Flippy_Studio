@@ -23,6 +23,7 @@ export const FloatingToolbar: React.FC = () => {
     const toolbarRef = useRef<HTMLDivElement>(null);
 
     const handleMouseDown = (e: React.MouseEvent) => {
+        e.preventDefault(); // Prevent native drag/selection
         e.stopPropagation(); // Prevent canvas selection from triggering
         if (e.target === toolbarRef.current || (e.target as HTMLElement).closest('.toolbar-handle')) {
             setIsDragging(true);
@@ -40,12 +41,14 @@ export const FloatingToolbar: React.FC = () => {
                 y: e.clientY - dragOffset.y
             };
             setPosition(newPos);
-            localStorage.setItem('floatingToolbarPosition', JSON.stringify(newPos));
         }
     };
 
     const handleMouseUp = () => {
-        setIsDragging(false);
+        if (isDragging) {
+            setIsDragging(false);
+            localStorage.setItem('floatingToolbarPosition', JSON.stringify(position));
+        }
     };
 
     React.useEffect(() => {
@@ -57,13 +60,13 @@ export const FloatingToolbar: React.FC = () => {
                 window.removeEventListener('mouseup', handleMouseUp);
             };
         }
-    }, [isDragging, dragOffset]);
+    }, [isDragging, dragOffset, position]);
 
     return (
         <div
             ref={toolbarRef}
             className={clsx(
-                "fixed bg-[#2C2C2C] border border-[#3C3C3C] rounded-xl shadow-lg p-2 flex items-center gap-1 z-[200] hover:shadow-xl transition-shadow",
+                "fixed bg-[#2C2C2C] border border-[#3C3C3C] rounded-xl shadow-lg p-2 flex items-center gap-1 z-[200] hover:shadow-xl transition-shadow select-none",
                 "flex items-center gap-1 p-2",
                 isDragging ? "cursor-grabbing" : "cursor-grab"
             )}
