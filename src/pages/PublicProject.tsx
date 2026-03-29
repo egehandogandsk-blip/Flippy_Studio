@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { InfiniteCanvas } from '../components/Canvas/InfiniteCanvas';
+import { InfiniteCanvas } from '../components/canvas/InfiniteCanvas';
 
 interface PublicProject {
     id: string;

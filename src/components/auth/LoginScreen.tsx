@@ -1,115 +1,100 @@
-import React, { useState } from 'react';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { auth } from '../../services/firebase';
-import { useAuthStore } from '../../store/useAuthStore';
+import React from 'react';
+import { SignIn } from '@clerk/clerk-react';
+import { Hexagon } from 'lucide-react';
 
-export const LoginScreen: React.FC = () => {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const setUser = useAuthStore((state) => state.setUser);
-
-    const handleGoogleLogin = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const provider = new GoogleAuthProvider();
-            const result = await signInWithPopup(auth, provider);
-            setUser(result.user);
-        } catch (err) {
-            const error = err as Error;
-            const errorMessage = error.message || 'Failed to sign in';
-            setError(errorMessage);
-            console.error('Login error:', err);
-
-            // Show Firebase Console instructions if unauthorized domain error
-            if (errorMessage.includes('unauthorized-domain')) {
-                setError('⚠️ Firebase domain hatası! Lütfen Firebase Console\'da "localhost" domain\'ini ekleyin. Detaylar için browser console\'u (F12) kontrol edin.');
-                console.error(`
-🔴 FIREBASE DOMAIN HATASI 🔴
-
-Çözüm Adımları:
-1. Firebase Console'u açın: https://console.firebase.google.com/project/forge-2cfcc/authentication/settings
-2. "Authorized domains" bölümüne gidin (sayfanın altında)
-3. "Add domain" butonuna tıklayın
-4. "localhost" yazın (PORT NUMARASI OLMADAN!)
-5. Save/Kaydet
-6. 1-2 dakika bekleyin
-7. Bu sayfayı yenileyin (Ctrl+Shift+R)
-
-Not: "localhost:5173" değil, sadece "localhost" yazın!
-        `);
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Development mode bypass
-    const handleDevMode = () => {
-        // Create a mock user for development
-        const mockUser = {
-            uid: 'dev-user-' + Date.now(),
-            email: 'dev@localhost',
-            displayName: 'Development User',
-            photoURL: null,
-        } as any;
-
-        setUser(mockUser);
-    };
-
+export const LoginScreen = () => {
     return (
-        <div className="flex items-center justify-center h-screen bg-gradient-to-br from-indigo-50 to-purple-50">
-            <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold text-indigo-600 mb-2">Studio Forge</h1>
-                    <p className="text-neutral-600">Professional vector design tool</p>
+        <div className="flex h-screen w-screen bg-zinc-950 text-white overflow-hidden font-sans">
+            {/* Left Side - Branding & Visuals */}
+            <div className="hidden lg:flex w-1/2 relative bg-zinc-900 flex-col justify-between p-12 border-r border-zinc-800">
+                {/* Background Effects */}
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 to-purple-900/40 opacity-80" />
+                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1620641788421-7f1c338e852c?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay opacity-30" />
+                <div className="absolute top-0 left-0 w-full h-full bg-grid-white/[0.05] pointer-events-none" />
+
+                {/* Logo & Content */}
+                <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                            <Hexagon className="w-6 h-6 text-white fill-indigo-600" />
+                        </div>
+                        <span className="text-2xl font-bold tracking-tight">Flippy</span>
+                    </div>
                 </div>
 
-                {error && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-                        {error}
-                    </div>
-                )}
-
-                <button
-                    onClick={handleGoogleLogin}
-                    disabled={loading}
-                    className="w-full flex items-center justify-center gap-3 bg-white border-2 border-neutral-200 hover:border-indigo-500 hover:bg-indigo-50 text-neutral-700 font-semibold py-3 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-3"
-                >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                    </svg>
-                    {loading ? 'Signing in...' : 'Continue with Google'}
-                </button>
-
-                {/* Development Mode Button */}
-                <button
-                    onClick={handleDevMode}
-                    className="w-full flex items-center justify-center gap-2 bg-yellow-50 border-2 border-yellow-300 hover:bg-yellow-100 text-yellow-800 font-semibold py-2 px-4 rounded-lg transition-all text-sm"
-                >
-                    <span>🔧 Development Mode (Skip Auth)</span>
-                </button>
-
-                <p className="text-xs text-neutral-500 text-center mt-6">
-                    By signing in, you agree to our Terms of Service and Privacy Policy.
-                </p>
-
-                <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-xs text-blue-800 font-semibold mb-1">⚠️ Firebase Ayarı Gerekli</p>
-                    <p className="text-xs text-blue-700">
-                        Google login çalışmıyorsa, Firebase Console'da <code className="bg-blue-100 px-1 rounded">localhost</code> domain'ini ekleyin.
-                        <a
-                            href="https://console.firebase.google.com/project/forge-2cfcc/authentication/settings"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 underline ml-1"
-                        >
-                            Ayarlar →
-                        </a>
+                <div className="relative z-10 max-w-lg">
+                    <h1 className="text-5xl font-bold mb-6 leading-tight">
+                        Design the Future of <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Digital Experience</span>
+                    </h1>
+                    <p className="text-lg text-zinc-400 leading-relaxed mb-8">
+                        The all-in-one platform for prototyping mobile apps, games, and web interfaces.
+                        Connect directly with Unity, Unreal, and Godot.
                     </p>
+
+                    <div className="flex items-center gap-4 text-sm font-medium text-zinc-500">
+                        <div className="flex -space-x-2">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="w-8 h-8 rounded-full border-2 border-zinc-900 bg-zinc-800 flex items-center justify-center text-[10px] text-white">
+                                    <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" className="w-full h-full rounded-full object-cover" />
+                                </div>
+                            ))}
+                        </div>
+                        <p>Joined by 10,000+ creators</p>
+                    </div>
+                </div>
+
+                <div className="relative z-10 text-xs text-zinc-600">
+                    © 2026 Flippy Inc. All rights reserved.
+                </div>
+            </div>
+
+            {/* Right Side - Auth Form */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-zinc-950 relative">
+                <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" />
+
+                {/* Glow Effect */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+
+                <div className="w-full max-w-lg relative z-10 backdrop-blur-xl rounded-3xl p-8">
+                    <SignIn
+                        appearance={{
+                            layout: {
+                                socialButtonsPlacement: "top",
+                                socialButtonsVariant: "blockButton",
+                            },
+                            variables: {
+                                colorPrimary: "#4f46e5", // Indigo 600
+                                colorText: "white",
+                                colorTextSecondary: "#a1a1aa", // Zinc 400
+                                colorBackground: "transparent",
+                                colorInputBackground: "#18181b", // Zinc 900
+                                colorInputText: "white",
+                                borderRadius: "0.75rem",
+                            },
+                            elements: {
+                                rootBox: "w-full",
+                                card: "bg-transparent shadow-none border-none p-0 w-full",
+                                headerTitle: "text-3xl font-bold text-white mb-2",
+                                headerSubtitle: "text-zinc-400 text-base mb-6",
+                                socialButtonsBlockButton: "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 text-white h-12 rounded-xl transition-all relative",
+                                socialButtonsBlockButtonText: "font-medium text-white",
+                                socialButtonsProviderIcon: "mr-2",
+                                dividerLine: "bg-zinc-800",
+                                dividerText: "text-zinc-500 bg-transparent px-3",
+                                formFieldLabel: "text-zinc-400 font-medium",
+                                formFieldInput: "bg-zinc-900/50 border-zinc-700 text-white rounded-xl h-11 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all",
+                                formButtonPrimary: "bg-indigo-600 hover:bg-indigo-500 text-white h-11 rounded-xl shadow-lg shadow-indigo-500/20 transition-all font-medium text-base",
+                                footerActionLink: "text-indigo-400 hover:text-indigo-300 font-medium",
+                                footer: "bg-transparent",
+                                identityPreviewText: "text-zinc-300",
+                                identityPreviewEditButtonIcon: "text-indigo-400",
+                                formFieldAction: "text-indigo-400 hover:text-indigo-300",
+                                alert: "bg-red-500/10 border border-red-500/20 text-red-200",
+                                alertText: "text-red-200",
+                                phoneInputBox: "bg-zinc-900 border-zinc-800 text-white rounded-xl"
+                            }
+                        }}
+                    />
                 </div>
             </div>
         </div>
