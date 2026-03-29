@@ -10,8 +10,10 @@ import {
     Star,
     Type,
     PenTool,
-    ChevronDown
+    ChevronDown,
+    GripVertical
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface ToolButtonProps {
     tool: string;
@@ -122,8 +124,18 @@ export const BottomToolbar: React.FC = () => {
     const isShapeTool = ['rectangle', 'line', 'arrow', 'ellipse', 'polygon', 'star'].includes(activeTool);
 
     return (
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-40">
-            <div className="glass-panel rounded-xl shadow-glow px-2 py-1 flex items-center gap-1">
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-40 pointer-events-none w-full max-w-full h-0 flex justify-center">
+            <motion.div 
+                className="glass-panel rounded-2xl shadow-2xl px-2 py-1.5 flex items-center gap-1 pointer-events-auto border border-white/10"
+                drag
+                dragMomentum={false}
+                dragConstraints={{ left: -500, right: 500, top: -800, bottom: 0 }}
+            >
+                {/* Drag Handle */}
+                <div className="flex items-center justify-center pl-1 pr-2 text-white/20 hover:text-white/50 cursor-grab active:cursor-grabbing">
+                    <GripVertical className="w-5 h-5" />
+                </div>
+                
                 {/* Cursor Tool */}
                 <ToolButton
                     tool="cursor"
@@ -212,7 +224,7 @@ export const BottomToolbar: React.FC = () => {
                         ...
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };

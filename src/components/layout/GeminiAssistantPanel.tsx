@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Send, Bot, Sparkles, SlidersHorizontal, Settings2 } from 'lucide-react';
 
-export const ClaudeAssistantPanel: React.FC = () => {
+export const GeminiAssistantPanel: React.FC = () => {
     const [messages, setMessages] = useState<Array<{ role: 'ai' | 'user', text: string }>>([
-        { role: 'ai', text: 'Hello! I am Claude, your design and game development assistant. How can I help you perfect this project?' }
+        { role: 'ai', text: 'Hello! I am Flippy Coworker, your design and game development assistant. How can I help you perfect this project?' }
     ]);
     const [inputValue, setInputValue] = useState('');
 
@@ -28,7 +28,7 @@ export const ClaudeAssistantPanel: React.FC = () => {
             <div className="h-14 border-b border-white/10 flex items-center justify-between px-4">
                 <div className="flex items-center gap-2 text-gray-100 font-semibold">
                     <Bot className="w-5 h-5 text-accent" />
-                    Claude Assistant
+                    Flippy Coworker
                 </div>
                 <div className="flex items-center gap-1">
                     <button className="p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
@@ -46,7 +46,7 @@ export const ClaudeAssistantPanel: React.FC = () => {
                     <div key={i} className={`flex flex-col max-w-[90%] ${msg.role === 'user' ? 'self-end items-end' : 'self-start items-start'}`}>
                         <div className={`text-xs text-gray-500 mb-1 flex items-center gap-1 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                             {msg.role === 'ai' ? <Sparkles className="w-3 h-3 text-accent" /> : <div className="w-3 h-3 bg-gray-500 rounded-full" />}
-                            {msg.role === 'ai' ? 'Claude' : 'You'}
+                            {msg.role === 'ai' ? 'Flippy Coworker' : 'You'}
                         </div>
                         <div className={`p-3 rounded-2xl text-sm leading-relaxed ${
                             msg.role === 'user' 
@@ -71,7 +71,7 @@ export const ClaudeAssistantPanel: React.FC = () => {
                                 handleSend();
                             }
                         }}
-                        placeholder="Ask Claude about your design..."
+                        placeholder="Ask Flippy Coworker..."
                         className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-4 pr-12 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-accent/50 resize-none h-16"
                     />
                     <button 

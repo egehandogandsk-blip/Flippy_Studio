@@ -5,7 +5,7 @@ import { PropertiesPanel } from './PropertiesPanel';
 import { BottomToolbar } from '../canvas/BottomToolbar';
 import { FabricCanvas } from '../canvas/FabricCanvas';
 import { useToolStore } from '../../store/useToolStore';
-import { ClaudeAssistantPanel } from './ClaudeAssistantPanel';
+import { GeminiAssistantPanel } from './GeminiAssistantPanel';
 
 export const MainLayout: React.FC = () => {
     const rightPanelMode = useToolStore((state) => state.rightPanelMode);
@@ -27,11 +27,11 @@ export const MainLayout: React.FC = () => {
                     <BottomToolbar />
                 </main>
 
-                {/* Right Panel: Properties or Claude */}
+                {/* Right Panel: Properties or Gemini */}
                 {rightPanelMode === 'properties' ? (
                     <PropertiesPanel />
                 ) : (
-                    <ClaudeAssistantPanel />
+                    <GeminiAssistantPanel />
                 )}
             </div>
         </div>

@@ -8,10 +8,10 @@ import { engineBridge } from '../../services/engineBridge';
 import type { SyncStatus } from '../../services/engineBridge';
 import { ShareButton } from '../collaboration/ShareButton';
 import { ActiveUsersIndicator } from '../collaboration/ActiveUsersIndicator';
-import { motion } from 'framer-motion';
+import { EngineSyncModal } from './EngineSyncModal';
 import { 
     Bot, Sparkles, BrainCircuit, Gamepad2, Blocks, RefreshCw,
-    Undo, Redo, Download, FileImage, FileCode, ChevronRight, GripHorizontal
+    Undo, Redo, Download, FileImage, FileCode, ChevronRight
 } from 'lucide-react';
 
 interface MenuItem {
@@ -26,6 +26,7 @@ export const TopToolbar: React.FC = () => {
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [showExportMenu, setShowExportMenu] = useState(false);
+    const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
 
     const menuRef = useRef<HTMLDivElement>(null);
     const exportMenuRef = useRef<HTMLDivElement>(null);
@@ -185,38 +186,25 @@ export const TopToolbar: React.FC = () => {
     };
 
     const handleEngineSync = () => {
-        if (engineStatus === 'disconnected' || engineStatus === 'error') {
-            engineBridge.connect('unity', 8080);
-        } else if (engineStatus === 'connected') {
-            // Mock push
-            engineBridge.pushToEngine({ objects: [] });
-        }
+        setIsSyncModalOpen(true);
     };
 
     const triggerAIPanel = (mode: string) => {
-        setRightPanelMode('claude');
+        setRightPanelMode('gemini');
         // Future: could pass 'mode' to the store to auto-start specific prompts
         console.log(`Triggering AI Panel in mode: ${mode}`);
     };
 
-    return (
-        <div className="absolute top-4 left-0 right-0 pointer-events-none flex justify-center z-50">
-            <motion.header 
-                drag
-                dragMomentum={false}
-                dragConstraints={{ left: -500, right: 500, top: 0, bottom: 800 }}
-                className="h-14 glass-panel flex items-center px-4 justify-between shrink-0 pointer-events-auto shadow-2xl rounded-2xl border border-white/10 w-[95%] max-w-[1400px]"
-            >
-                {/* Drag Handle */}
-                <div className="flex items-center justify-center mr-3 text-white/20 hover:text-white/50 cursor-grab active:cursor-grabbing">
-                    <GripHorizontal className="w-5 h-5" />
-                </div>
+    const canvasMode = useToolStore((state) => state.canvasMode);
+    const setCanvasMode = useToolStore((state) => state.setCanvasMode);
 
-                {/* Left: Logo + Menu Items */}
-                <div className="flex items-center gap-2 flex-shrink-0">
-                    <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center shadow-glow mr-2">
-                        <span className="text-white font-bold text-xl leading-none">F</span>
-                    </div>
+    return (
+        <header className="h-14 glass-panel flex items-center px-4 justify-between z-50 shrink-0 relative">
+            {/* Left: Logo + Menu Items */}
+            <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center shadow-glow mr-2">
+                    <span className="text-white font-bold text-xl leading-none">F</span>
+                </div>
 
                 {/* File Menu */}
                 <div className="relative">
@@ -254,16 +242,31 @@ export const TopToolbar: React.FC = () => {
 
             {/* Center: Mode Switcher */}
             <div className="hidden lg:flex items-center justify-center flex-1 mx-4 min-w-[200px]">
-                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
-                    <button className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5 relative">
+                    <button 
+                        onClick={() => setCanvasMode('vector')}
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                            canvasMode === 'vector' ? 'bg-accent text-white shadow-glow' : 'text-gray-400 hover:text-white'
+                        }`}
+                    >
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 22h20L12 2z"/></svg>
                         Vector
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                    <button 
+                        onClick={() => setCanvasMode('pixel')}
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                            canvasMode === 'pixel' ? 'bg-accent text-white shadow-glow' : 'text-gray-400 hover:text-white'
+                        }`}
+                    >
                         <div className="w-3 h-3 border-2 border-current rounded-full"></div>
                         Pixel
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium bg-accent text-white shadow-glow transition-all">
+                    <button 
+                        onClick={() => setCanvasMode('layout')}
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                            canvasMode === 'layout' ? 'bg-accent text-white shadow-glow' : 'text-gray-400 hover:text-white'
+                        }`}
+                    >
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M9 3v18"/></svg>
                         Layout
                     </button>
@@ -315,13 +318,13 @@ export const TopToolbar: React.FC = () => {
                         Gen AI
                     </button>
                     <button 
-                        onClick={() => setRightPanelMode(rightPanelMode === 'claude' ? 'properties' : 'claude')}
+                        onClick={() => setRightPanelMode(rightPanelMode === 'gemini' ? 'properties' : 'gemini')}
                         className={`flex items-center justify-center p-1.5 rounded-lg transition-colors ml-1 border ${
-                            rightPanelMode === 'claude' 
+                            rightPanelMode === 'gemini' 
                                 ? 'bg-accent/20 border-accent/50 text-accent shadow-glow' 
                                 : 'bg-white/5 border-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                         }`}
-                        title="Toggle Claude Assistant"
+                        title="Toggle Flippy Coworker"
                     >
                         <Bot className="w-4 h-4" />
                     </button>
@@ -452,7 +455,11 @@ export const TopToolbar: React.FC = () => {
                     )}
                 </div>
             </div>
-        </motion.header>
-    </div>
+            
+            <EngineSyncModal 
+                isOpen={isSyncModalOpen} 
+                onClose={() => setIsSyncModalOpen(false)} 
+            />
+        </header>
     );
 };

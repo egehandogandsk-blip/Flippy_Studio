@@ -33,6 +33,7 @@ export const FabricCanvas: React.FC = () => {
     const [tempHandleCircle, setTempHandleCircle] = useState<fabric.Circle | null>(null);
 
     const { activeTool, setActiveTool } = useToolStore();
+    const canvasMode = useToolStore((state) => state.canvasMode);
     const { addLayer, removeLayer, setLayers } = useLayersStore();
 
     // Initialize canvas sync
@@ -48,7 +49,7 @@ export const FabricCanvas: React.FC = () => {
         }
 
         const canvas = new fabric.Canvas(canvasRef.current, {
-            backgroundColor: '#1f1f1f',
+            backgroundColor: 'transparent',
             width: containerRef.current.clientWidth,
             height: containerRef.current.clientHeight,
             selection: activeTool === 'cursor',
@@ -567,6 +568,45 @@ export const FabricCanvas: React.FC = () => {
                     break;
                 }
 
+                case 'polygon': {
+                    // Simple triangle as polygon
+                    shape = new fabric.Polygon([
+                        { x: 0, y: -50 },
+                        { x: 50, y: 50 },
+                        { x: -50, y: 50 }
+                    ], {
+                        left: pointer.x,
+                        top: pointer.y,
+                        fill: '#D9D9D9',
+                        stroke: '#000000',
+                        strokeWidth: 2,
+                        selectable: false,
+                        scaleX: 0,
+                        scaleY: 0,
+                        originX: 'center',
+                        originY: 'center',
+                    });
+                    break;
+                }
+
+                case 'star': {
+                    // 5-point star path
+                    const starPath = "M 0 -50 L 11.2 -15.4 L 47.5 -15.4 L 18.1 5.9 L 29.3 40.4 L 0 19.1 L -29.3 40.4 L -18.1 5.9 L -47.5 -15.4 L -11.2 -15.4 Z";
+                    shape = new fabric.Path(starPath, {
+                        left: pointer.x,
+                        top: pointer.y,
+                        fill: '#D9D9D9',
+                        stroke: '#000000',
+                        strokeWidth: 2,
+                        selectable: false,
+                        scaleX: 0,
+                        scaleY: 0,
+                        originX: 'center',
+                        originY: 'center',
+                    });
+                    break;
+                }
+
                 case 'frame': {
                     shape = new fabric.Rect({
                         left: pointer.x,
@@ -721,6 +761,30 @@ export const FabricCanvas: React.FC = () => {
                     break;
                 }
 
+                case 'polygon':
+                case 'star': {
+                    // Update scale based on distance
+                    const dx = pointer.x - startPoint.x;
+                    const dy = pointer.y - startPoint.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (isAltPressed) {
+                        currentShape.set({
+                            scaleX: distance / 50,
+                            scaleY: distance / 50,
+                        });
+                    } else {
+                        currentShape.set({
+                            scaleX: distance / 100,
+                            scaleY: distance / 100,
+                            left: startPoint.x + dx / 2,
+                            top: startPoint.y + dy / 2,
+                        });
+                    }
+                    break;
+                }
+
+                case 'arrow':
                 case 'line': {
                     const line = currentShape as fabric.Line;
                     line.set({
@@ -768,17 +832,37 @@ export const FabricCanvas: React.FC = () => {
         };
     }, [activeTool, isDrawing, currentShape, startPoint, setActiveTool, penPath, penPoints, isDraggingHandle, tempHandleCircle]);
 
+    // Grid Pattern Settings based on mode
+    const getGridStyle = () => {
+        if (canvasMode === 'pixel') return null; // No grid
+
+        if (canvasMode === 'layout') {
+            return {
+                backgroundImage: 'radial-gradient(circle, #ffffff 1.5px, transparent 1.5px)',
+                backgroundSize: '24px 24px',
+                backgroundPosition: 'center center',
+                opacity: 0.15
+            };
+        }
+
+        // Default: vector mode
+        return {
+            backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
+            backgroundSize: '40px 40px',
+            backgroundPosition: 'center center',
+            opacity: 0.05
+        };
+    };
+
     return (
-        <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-transparent">
+        <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-[#1f1f1f]">
             {/* Grid Pattern Background */}
-            <div 
-                className="absolute inset-0 z-0 pointer-events-none opacity-20"
-                style={{
-                    backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
-                    backgroundSize: `${10}px ${10}px`,
-                    backgroundPosition: 'center center'
-                }}
-            />
+            {canvasMode !== 'pixel' && (
+                <div 
+                    className="absolute inset-0 z-0 pointer-events-none"
+                    style={getGridStyle() as React.CSSProperties}
+                />
+            )}
             
             <canvas ref={canvasRef} />
 
