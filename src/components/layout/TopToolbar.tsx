@@ -8,9 +8,10 @@ import { engineBridge } from '../../services/engineBridge';
 import type { SyncStatus } from '../../services/engineBridge';
 import { ShareButton } from '../collaboration/ShareButton';
 import { ActiveUsersIndicator } from '../collaboration/ActiveUsersIndicator';
+import { motion } from 'framer-motion';
 import { 
     Bot, Sparkles, BrainCircuit, Gamepad2, Blocks, RefreshCw,
-    Undo, Redo, Download, FileImage, FileCode, ChevronRight 
+    Undo, Redo, Download, FileImage, FileCode, ChevronRight, GripHorizontal
 } from 'lucide-react';
 
 interface MenuItem {
@@ -192,13 +193,30 @@ export const TopToolbar: React.FC = () => {
         }
     };
 
+    const triggerAIPanel = (mode: string) => {
+        setRightPanelMode('claude');
+        // Future: could pass 'mode' to the store to auto-start specific prompts
+        console.log(`Triggering AI Panel in mode: ${mode}`);
+    };
+
     return (
-        <header className="h-14 glass-panel flex items-center px-4 justify-between z-50 shrink-0 relative">
-            {/* Left: Logo + Menu Items */}
-            <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center shadow-glow mr-2">
-                    <span className="text-white font-bold text-xl leading-none">F</span>
+        <div className="absolute top-4 left-0 right-0 pointer-events-none flex justify-center z-50">
+            <motion.header 
+                drag
+                dragMomentum={false}
+                dragConstraints={{ left: -500, right: 500, top: 0, bottom: 800 }}
+                className="h-14 glass-panel flex items-center px-4 justify-between shrink-0 pointer-events-auto shadow-2xl rounded-2xl border border-white/10 w-[95%] max-w-[1400px]"
+            >
+                {/* Drag Handle */}
+                <div className="flex items-center justify-center mr-3 text-white/20 hover:text-white/50 cursor-grab active:cursor-grabbing">
+                    <GripHorizontal className="w-5 h-5" />
                 </div>
+
+                {/* Left: Logo + Menu Items */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center shadow-glow mr-2">
+                        <span className="text-white font-bold text-xl leading-none">F</span>
+                    </div>
 
                 {/* File Menu */}
                 <div className="relative">
@@ -235,29 +253,27 @@ export const TopToolbar: React.FC = () => {
             </div>
 
             {/* Center: Mode Switcher */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
-                <button className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 22h20L12 2z"/></svg>
-                    Vector
-                </button>
-                <button className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">
-                    <div className="w-3 h-3 border-2 border-current rounded-full"></div>
-                    Pixel
-                </button>
-                <button className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium bg-accent text-white shadow-glow transition-all">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M9 3v18"/></svg>
-                    Layout
-                </button>
-                <button className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">
-                    <span className="text-lg leading-none">✨</span>
-                    Canva AI
-                </button>
+            <div className="hidden lg:flex items-center justify-center flex-1 mx-4 min-w-[200px]">
+                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
+                    <button className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 22h20L12 2z"/></svg>
+                        Vector
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                        <div className="w-3 h-3 border-2 border-current rounded-full"></div>
+                        Pixel
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium bg-accent text-white shadow-glow transition-all">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M9 3v18"/></svg>
+                        Layout
+                    </button>
+                </div>
             </div>
 
             {/* Right: Actions + Profile */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
                 {/* AI Tools */}
-                <div className="hidden lg:flex items-center gap-2 mr-2 border-r border-white/10 pr-4">
+                <div className="hidden xl:flex items-center gap-2 mr-2 border-r border-white/10 pr-4">
                     {/* Game Engine Sync Button */}
                     <button 
                         onClick={handleEngineSync}
@@ -284,11 +300,17 @@ export const TopToolbar: React.FC = () => {
                     
                     <div className="w-px h-6 bg-white/10 mx-1"></div>
 
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-white/5 text-nowrap">
+                    <button 
+                        onClick={() => triggerAIPanel('train')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-white/5 text-nowrap"
+                    >
                         <BrainCircuit className="w-3.5 h-3.5 text-purple-400" />
                         Train with AI
                     </button>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 rounded-lg transition-all shadow-glow text-nowrap">
+                    <button 
+                        onClick={() => triggerAIPanel('gen')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 rounded-lg transition-all shadow-glow text-nowrap"
+                    >
                         <Sparkles className="w-3.5 h-3.5" />
                         Gen AI
                     </button>
@@ -430,6 +452,7 @@ export const TopToolbar: React.FC = () => {
                     )}
                 </div>
             </div>
-        </header>
+        </motion.header>
+    </div>
     );
 };
